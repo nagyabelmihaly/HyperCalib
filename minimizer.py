@@ -14,11 +14,12 @@ class ErrorFunc:
             result += (y - self.func(x, *params)) ** 2
         return result
 
-def fit_model(func, xdata, ydata, constraints):
+def fit_model(func, xdata, ydata, constraints, callback):
     ef = ErrorFunc(func, xdata, ydata)
     params = [1.0] * 4
     res = minimize(ef.objfunc, params, method='trust-constr', \
-                   constraints=constraints, tol=1e-8, \
+                   constraints=constraints, \
                    jac='2-point', hess=BFGS(),
+                   callback=callback,
                    options={'maxiter':10000, 'disp': True})
     return res.x
