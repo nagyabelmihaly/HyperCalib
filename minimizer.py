@@ -14,7 +14,19 @@ class ErrorFunc:
             result += (y - self.func(x, *params)) ** 2
         return result
 
-def fit_model(func, xdata, ydata, constraints, callback):
+def fit_model(func, xdata, ydata, constraints=(), callback=None):
+    """Finds the optimal parameters for the given function and input data.
+    ----------
+    Keyword arguments:
+    func -- The function whose parameters are to be optimized.
+            Should have syntax func(x, *params).
+    xdata -- The list of x coordinates of size (n,).
+    ydata -- The list of y coordinates of size (n,).
+    constraints -- A single (or a list of) constrain objects. (default: ())
+    callback -- This callback is called after each iteration step.
+                Should have syntax callback(xk, OptimizeResult state)
+                where xk is the current parameter vector.
+    """
     ef = ErrorFunc(func, xdata, ydata)
     params = [1.0] * 4
     res = minimize(ef.objfunc, params, method='trust-constr', \

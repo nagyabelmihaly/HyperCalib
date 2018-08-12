@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib
 matplotlib.use("TkAgg")
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib import animation
 from matplotlib import style
@@ -28,9 +28,10 @@ def init(top, gui, *args, **kwargs):
     w.EntryDelimiter.insert(0, ',')
 
     # Initialize a Figure for plotting.
-    fig = Figure(figsize=(5, 5), dpi=100)
+    fig = Figure(figsize=(5, 2), dpi=100)
     global plt
     plt = fig.add_subplot(111)
+    fig.set_tight_layout(True)
     
     # Initialize a canvas to draw the Figure.
     global canvas
@@ -39,7 +40,7 @@ def init(top, gui, *args, **kwargs):
 
     # Initialize navigation toolbar.
     global toolbar
-    toolbar = NavigationToolbar2TkAgg(canvas, w.FrameNavigation)
+    toolbar = NavigationToolbar2Tk(canvas, w.FrameNavigation)
     canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
     # Add animation to plot interactively.
@@ -61,6 +62,7 @@ def ButtonProcess_Click():
 
     # Start a background thread to process file.
     thread_dataproc = threading.Thread(target=process_data, args=(filename, delimiter, samples))
+    thread_dataproc.setDaemon(True)
     thread_dataproc.start()
 
 def ButtonFitModel_Click():
@@ -101,6 +103,9 @@ def plot(i):
         xlin = np.linspace(min(xdata), max(xdata))
         plt.plot(xlin, func(xlin, *params), 'r-', label='fit')
         is_empty = False
+
+        # Write parameters to Text widget also.
+        set_text(w.TextParameters, 'alpha1 = {}\nalpha2 = {}\nmu1 = {}\nmu2 = {}'.format(*params))
     except NameError:
         pass
 
@@ -111,3 +116,7 @@ def plot(i):
         plt.legend()
         canvas.draw()
         toolbar.update()
+
+def set_text(text, value):
+    text.delete(1.0, tk.END)
+    text.insert(tk.END, value)

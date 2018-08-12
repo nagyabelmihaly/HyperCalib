@@ -68,7 +68,7 @@ proc vTclWindow.top37 {base} {
         -background {#d9d9d9} -highlightbackground {#d9d9d9} \
         -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 510x555+624+268
+    wm geometry $top 997x530+436+400
     update
     # set in toplevel.wgt.
     global vTcl
@@ -101,8 +101,8 @@ proc vTclWindow.top37 {base} {
         -text {Process File} 
     vTcl:DefineAlias "$top.but38" "ButtonProcess" vTcl:WidgetProc "Toplevel1" 1
     frame $top.fra38 \
-        -borderwidth 2 -relief groove -background {#d9d9d9} -height 205 \
-        -highlightbackground {#d9d9d9} -highlightcolor black -width 465 
+        -borderwidth 2 -relief groove -background {#d9d9d9} -height 255 \
+        -highlightbackground {#d9d9d9} -highlightcolor black -width 470 
     vTcl:DefineAlias "$top.fra38" "FramePlot" vTcl:WidgetProc "Toplevel1" 1
     entry $top.ent40 \
         -background white -disabledforeground {#a3a3a3} -font TkFixedFont \
@@ -151,16 +151,22 @@ proc vTclWindow.top37 {base} {
         -highlightcolor black -justify left -value 2 -variable radiovar 
     vTcl:DefineAlias "$top.rad47" "RadiobuttonPS" vTcl:WidgetProc "Toplevel1" 1
     label $top.lab39 \
-        -anchor w -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -text {Uniaxial tension} 
+        -activebackground {#f9f9f9} -activeforeground black -anchor w \
+        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -text {Uniaxial tension} 
     vTcl:DefineAlias "$top.lab39" "Label4" vTcl:WidgetProc "Toplevel1" 1
     label $top.lab42 \
-        -anchor w -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -text {Equibiaxial tension} 
+        -activebackground {#f9f9f9} -activeforeground black -anchor w \
+        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -text {Equibiaxial tension} 
     vTcl:DefineAlias "$top.lab42" "Label5" vTcl:WidgetProc "Toplevel1" 1
     label $top.lab44 \
-        -anchor w -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -text {Pure shear} 
+        -activebackground {#f9f9f9} -activeforeground black -anchor w \
+        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -text {Pure shear} 
     vTcl:DefineAlias "$top.lab44" "Label6" vTcl:WidgetProc "Toplevel1" 1
     button $top.but45 \
         -activebackground {#d9d9d9} -activeforeground {#000000} \
@@ -169,6 +175,14 @@ proc vTclWindow.top37 {base} {
         -highlightbackground {#d9d9d9} -highlightcolor black -pady 0 \
         -text {Fit model} 
     vTcl:DefineAlias "$top.but45" "ButtonFitModel" vTcl:WidgetProc "Toplevel1" 1
+    text $top.tex38 \
+        -background white -font TkTextFont -foreground black -height 174 \
+        -highlightbackground {#d9d9d9} -highlightcolor black \
+        -insertbackground black -selectbackground {#c4c4c4} \
+        -selectforeground black -state disabled -width 470 -wrap word 
+    .top37.tex38 configure -font TkTextFont
+    .top37.tex38 insert end text
+    vTcl:DefineAlias "$top.tex38" "TextParameters" vTcl:WidgetProc "Toplevel1" 1
     ###################
     # SETTING GEOMETRY
     ###################
@@ -180,14 +194,14 @@ proc vTclWindow.top37 {base} {
         -in $top -x 20 -y 120 -width 470 -relwidth 0 -height 26 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.fra38 \
-        -in $top -x 20 -y 290 -width 470 -relwidth 0 -height 205 -relheight 0 \
-        -anchor nw -bordermode ignore 
+        -in $top -x 510 -y 210 -width 470 -relwidth 0 -height 255 \
+        -relheight 0 -anchor nw -bordermode ignore 
     place $top.ent40 \
         -in $top -x 100 -y 50 -anchor nw -bordermode ignore 
     place $top.lab41 \
         -in $top -x 20 -y 50 -anchor nw -bordermode ignore 
     place $top.fra42 \
-        -in $top -x 20 -y 500 -width 470 -relwidth 0 -height 35 -relheight 0 \
+        -in $top -x 510 -y 480 -width 470 -relwidth 0 -height 35 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.lab43 \
         -in $top -x 20 -y 80 -anchor nw -bordermode ignore 
@@ -212,6 +226,9 @@ proc vTclWindow.top37 {base} {
     place $top.but45 \
         -in $top -x 20 -y 250 -width 470 -height 26 -anchor nw \
         -bordermode ignore 
+    place $top.tex38 \
+        -in $top -x 510 -y 20 -width 470 -relwidth 0 -height 174 -relheight 0 \
+        -anchor nw -bordermode ignore 
 
     vTcl:FireEvent $base <<Ready>>
 }
