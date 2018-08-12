@@ -80,7 +80,7 @@ def process_data(filename, delimiter, samples):
 
 def fit_model():
     minimizer.fit_model(func, xdata, ydata, \
-                        constraints=funcs.ogden_constraints(), \
+                        constraints=funcs.ogden_constraint(), \
                         callback=update_model)
 
 def update_model(xk, state):

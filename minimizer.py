@@ -25,7 +25,7 @@ def fit_model(func, xdata, ydata, constraints=(), callback=None):
     constraints -- A single (or a list of) constrain objects. (default: ())
     callback -- This callback is called after each iteration step.
                 Should have syntax callback(xk, OptimizeResult state)
-                where xk is the current parameter vector.
+                where xk is the current parameter vector. (default: ())
     """
     ef = ErrorFunc(func, xdata, ydata)
     params = [1.0] * 4
