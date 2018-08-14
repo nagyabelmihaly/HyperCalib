@@ -37,4 +37,4 @@ def process_file(filename, delimiter=',', samples=-1, columns=[Columns.STRETCH, 
                 del xdata[minindex]
                 del ydata[minindex]
 
-        return np.asarray(xdata), np.asarray(ydata)
+        return xdata, ydata
