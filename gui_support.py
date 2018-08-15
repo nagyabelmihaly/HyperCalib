@@ -9,11 +9,11 @@ style.use('ggplot')
 import tkinter as tk
 from tkinter import messagebox
 import threading
+from scipy.optimize import minimize, BFGS
 
 import dataprocessor
 import funcs
 from errorfuncs import MSE, WeightedError
-import minimizer
 
 def init(top, gui, *args, **kwargs):
     global w, top_level, root
@@ -21,9 +21,10 @@ def init(top, gui, *args, **kwargs):
     top_level = top
     root = top
 
-    global functions, titles, data_markers, fit_markers
+    global functions, jacobians, titles, data_markers, fit_markers
     global fit_checkbuttons, weight_entries, plot_checkbuttons
     functions = [funcs.ogden_ut, funcs.ogden_et, funcs.ogden_ps]
+    jacobians = [funcs.ogden_ut_jac, funcs.ogden_et_jac, funcs.ogden_ps_jac]
     titles = ['UT', 'ET', 'PS']
     data_markers = ['bo', 'ro', 'go']
     fit_markers = ['b-', 'r-', 'g-']
@@ -133,9 +134,13 @@ def fit_model():
         messagebox.showerror('Error', 'Weights must be real numbers.')
         return
     global errors, weighted_error
-    errors = [MSE(functions[i], xdatas[i], ydatas[i]) if xdatas[i] is not None else None for i in range(3)]
+    errors = [MSE(functions[i], jacobians[i], xdatas[i], ydatas[i]) if xdatas[i] is not None else None for i in range(3)]
     weighted_error = WeightedError(errors, weights)
-    minimizer.fit_model(weighted_error.objfunc, constraints=funcs.ogden_constraint(), callback=update_model)
+    minimize(weighted_error.objfunc, [1.0] * 4, method='trust-constr', \
+                   constraints=funcs.ogden_constraint(), \
+                   jac=weighted_error.jac, hess=BFGS(),
+                   callback=update_model,
+                   options={'maxiter':10000, 'disp': True})
 
 def update_model(xk, state):
     global params
