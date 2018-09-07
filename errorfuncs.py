@@ -1,7 +1,7 @@
-from numpy import array
+from numpy import array, dot
 
 class MSE:
-    def __init__(self, func, jac, xdata, ydata):
+    def __init__(self, func, jac, hess, xdata, ydata):
         """Initializes a MSE instance whose objective function
         calculates the mean squared error between the given
         data points and the function.
@@ -15,6 +15,7 @@ class MSE:
         """
         self.func = func
         self.fjac = jac
+        self.fhess = hess
         self.data = list(zip(xdata, ydata))
     
     def objfunc(self, params):
@@ -29,11 +30,15 @@ class MSE:
         when the parameters are applied."""
         result = array([0.0] * len(params))
         for x, y in self.data:
-            diff = y - self.func(x, *params)
-            j = self.fjac(x, *params)
-            inc = diff * j
-            result += inc
+            result -= (y - self.func(x, *params)) * self.fjac(x, *params)
         return result * 2 / len(self.data)
+    
+    def hess(self, params):
+        """Calculates the Hessian matrix of the objective function
+        when the parameters are applied."""
+        return array([[2 / len(self.data) * sum([self.jac(params)[i] * self.jac(params)[j] - \
+            (y - self.func(x, *params)) * self.fhess(x, *params)[i][j] for x, y in self.data]) \
+            for i in range(len(params))] for j in range(len(params))])
 
 class WeightedError:
     def __init__(self, errors, weights):
@@ -59,7 +64,17 @@ class WeightedError:
         when the parameters are applied."""
         result = array([0.0] * len(params))
         for err, weight in self.factors:
-            j = err.jac(params)
-            inc = j * weight
-            result += inc
+            result += err.jac(params) * weight
         return result
+    
+    def hess(self, params):
+        """Calculates the Hessian matrix of the objective function
+        when the parameters are applied."""
+        return array([[sum(error.hess(params) * weight \
+            for error, weight in self.factors) \
+            for i in range(len(params))] for j in range(len(params))])
+    
+    def hessp(self, params, p):
+        """"""
+        return self.hess(params).dot(p)
+        

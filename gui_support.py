@@ -21,10 +21,11 @@ def init(top, gui, *args, **kwargs):
     top_level = top
     root = top
 
-    global functions, jacobians, titles, data_markers, fit_markers
+    global functions, jacobians, hessians, titles, data_markers, fit_markers
     global fit_checkbuttons, weight_entries, plot_checkbuttons
     functions = [funcs.ogden_ut, funcs.ogden_et, funcs.ogden_ps]
     jacobians = [funcs.ogden_ut_jac, funcs.ogden_et_jac, funcs.ogden_ps_jac]
+    hessians = [funcs.ogden_ut_hess, funcs.ogden_et_hess, funcs.ogden_ps_hess]
     titles = ['UT', 'ET', 'PS']
     data_markers = ['bo', 'ro', 'go']
     fit_markers = ['b-', 'r-', 'g-']
@@ -134,11 +135,12 @@ def fit_model():
         messagebox.showerror('Error', 'Weights must be real numbers.')
         return
     global errors, weighted_error
-    errors = [MSE(functions[i], jacobians[i], xdatas[i], ydatas[i]) if xdatas[i] is not None else None for i in range(3)]
+    errors = [MSE(functions[i], jacobians[i], hessians[i], xdatas[i], ydatas[i]) \
+        if xdatas[i] is not None else None for i in range(3)]
     weighted_error = WeightedError(errors, weights)
     minimize(weighted_error.objfunc, [1.0] * 4, method='trust-constr', \
                    constraints=funcs.ogden_constraint(), \
-                   jac=weighted_error.jac, hess=BFGS(),
+                   jac=weighted_error.jac, hess=weighted_error.hess,
                    callback=update_model,
                    options={'maxiter':10000, 'disp': True})
 
@@ -157,7 +159,7 @@ def plot(i):
         xdata = xdatas[defmode]
         ydata = ydatas[defmode]
         label = titles[defmode]
-        if errors[defmode] is not None:
+        if errors[defmode] is not None and params is not None:
             label += ' - error={:.4f}'.format(errors[defmode].objfunc(params))
         plt.plot(xdata, ydata, data_markers[defmode], label=label)
         is_empty = False
@@ -171,7 +173,7 @@ def plot(i):
     if params is not None:
         # Write parameters and weighted error to Text widget.
         set_text(w.TextParameters,
-                 'alpha1 = {}\nalpha2 = {}\nmu1 = {}\nmu2 = {}\n\nerror = {}'.format(*params,
+                 'mu1 = {}\nmu2 = {}\nalpha1 = {}\nalpha2 = {}\n\nerror = {}'.format(*params,
                     weighted_error.objfunc(params)))
 
     if not is_empty:        
