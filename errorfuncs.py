@@ -1,4 +1,4 @@
-from numpy import array, dot
+from numpy import array, dot, empty
 
 class MSE:
     def __init__(self, func, jac, hess, xdata, ydata):
@@ -70,7 +70,15 @@ class WeightedError:
     def hess(self, params):
         """Calculates the Hessian matrix of the objective function
         when the parameters are applied."""
-        return array([[sum(error.hess(params) * weight \
+        # result = empty((len(params), len(params)))
+        # for i in range(len(params)):
+        #     for j in range(len(params)):
+        #         s = 0
+        #         for error, weight in self.factors:
+        #             s += error.hess(params)[i, j] * weight
+        #         result[i, j] = s
+        # return result
+        return array([[sum(error.hess(params)[i, j] * weight \
             for error, weight in self.factors) \
             for i in range(len(params))] for j in range(len(params))])
     

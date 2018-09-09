@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib
-matplotlib.use("TkAgg")
+matplotlib.use("Agg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib import animation
@@ -12,7 +12,7 @@ import threading
 from scipy.optimize import minimize, BFGS
 
 import dataprocessor
-import funcs
+from ogden import Ogden
 from errorfuncs import MSE, WeightedError
 
 def init(top, gui, *args, **kwargs):
@@ -21,11 +21,12 @@ def init(top, gui, *args, **kwargs):
     top_level = top
     root = top
 
-    global functions, jacobians, hessians, titles, data_markers, fit_markers
+    global model, functions, jacobians, hessians, titles, data_markers, fit_markers
     global fit_checkbuttons, weight_entries, plot_checkbuttons
-    functions = [funcs.ogden_ut, funcs.ogden_et, funcs.ogden_ps]
-    jacobians = [funcs.ogden_ut_jac, funcs.ogden_et_jac, funcs.ogden_ps_jac]
-    hessians = [funcs.ogden_ut_hess, funcs.ogden_et_hess, funcs.ogden_ps_hess]
+    model = Ogden()
+    functions = [model.ut, model.et, model.ps]
+    jacobians = [model.ut_jac, model.et_jac, model.ps_jac]
+    hessians = [model.ut_hess, model.et_hess, model.ps_hess]
     titles = ['UT', 'ET', 'PS']
     data_markers = ['bo', 'ro', 'go']
     fit_markers = ['b-', 'r-', 'g-']
@@ -139,7 +140,7 @@ def fit_model():
         if xdatas[i] is not None else None for i in range(3)]
     weighted_error = WeightedError(errors, weights)
     minimize(weighted_error.objfunc, [1.0] * 4, method='trust-constr', \
-                   constraints=funcs.ogden_constraint(), \
+                   constraints=model.constraint(), \
                    jac=weighted_error.jac, hess=weighted_error.hess,
                    callback=update_model,
                    options={'maxiter':10000, 'disp': True})
