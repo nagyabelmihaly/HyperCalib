@@ -138,6 +138,7 @@ def fit_model():
     global errors, weighted_error
     errors = [MSE(functions[i], jacobians[i], hessians[i], xdatas[i], ydatas[i]) \
         if xdatas[i] is not None else None for i in range(3)]
+    #print(errors[2].hess([3.525, 0.2873, 8.952, 2.0597]))
     weighted_error = WeightedError(errors, weights)
     minimize(weighted_error.objfunc, [1.0] * 4, method='trust-constr', \
                    constraints=model.constraint(), \
