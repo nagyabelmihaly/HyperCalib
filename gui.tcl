@@ -137,21 +137,21 @@ proc vTclWindow.top37 {base} {
         -background {#d9d9d9} -disabledforeground {#a3a3a3} \
         -foreground {#000000} -highlightbackground {#d9d9d9} \
         -highlightcolor black -justify left -text {Uniaxial tension} -value 0 \
-        -variable radiovar 
+        -variable gui_support.radiovar 
     vTcl:DefineAlias "$top.rad45" "RadiobuttonUT" vTcl:WidgetProc "Toplevel1" 1
     radiobutton $top.rad46 \
         -activebackground {#d9d9d9} -activeforeground {#000000} \
         -background {#d9d9d9} -disabledforeground {#a3a3a3} \
         -foreground {#000000} -highlightbackground {#d9d9d9} \
         -highlightcolor black -justify left -text {Equibiaxial tension} \
-        -value 1 -variable radiovar 
+        -value 1 -variable gui_support.radiovar 
     vTcl:DefineAlias "$top.rad46" "RadiobuttonET" vTcl:WidgetProc "Toplevel1" 1
     radiobutton $top.rad47 \
         -activebackground {#d9d9d9} -activeforeground {#000000} \
         -background {#d9d9d9} -disabledforeground {#a3a3a3} \
         -foreground {#000000} -highlightbackground {#d9d9d9} \
         -highlightcolor black -justify left -text {Pure shear} -value 2 \
-        -variable radiovar 
+        -variable gui_support.radiovar 
     vTcl:DefineAlias "$top.rad47" "RadiobuttonPS" vTcl:WidgetProc "Toplevel1" 1
     button $top.but45 \
         -activebackground {#d9d9d9} -activeforeground {#000000} \
@@ -173,21 +173,21 @@ proc vTclWindow.top37 {base} {
         -background {#d9d9d9} -disabledforeground {#a3a3a3} \
         -foreground {#000000} -highlightbackground {#d9d9d9} \
         -highlightcolor black -justify left -state disabled \
-        -text {Uniaxial tension} -variable {isFit[0]} 
+        -text {Uniaxial tension} -variable {gui_support.isFit[0]} 
     vTcl:DefineAlias "$top.che39" "CheckbuttonFitUT" vTcl:WidgetProc "Toplevel1" 1
     checkbutton $top.che40 \
         -activebackground {#d9d9d9} -activeforeground {#000000} \
         -background {#d9d9d9} -disabledforeground {#a3a3a3} \
         -foreground {#000000} -highlightbackground {#d9d9d9} \
         -highlightcolor black -justify left -state disabled \
-        -text {Equibiaxial tension} -variable {isFit[1]} 
+        -text {Equibiaxial tension} -variable {gui_support.isFit[1]} 
     vTcl:DefineAlias "$top.che40" "CheckbuttonFitET" vTcl:WidgetProc "Toplevel1" 1
     checkbutton $top.che42 \
         -activebackground {#d9d9d9} -activeforeground {#000000} \
         -background {#d9d9d9} -disabledforeground {#a3a3a3} \
         -foreground {#000000} -highlightbackground {#d9d9d9} \
         -highlightcolor black -justify left -state disabled \
-        -text {Pure shear} -variable {isFit[2]} 
+        -text {Pure shear} -variable {gui_support.isFit[2]} 
     vTcl:DefineAlias "$top.che42" "CheckbuttonFitPS" vTcl:WidgetProc "Toplevel1" 1
     entry $top.ent43 \
         -background white -disabledforeground {#a3a3a3} -font TkFixedFont \
@@ -212,21 +212,21 @@ proc vTclWindow.top37 {base} {
         -background {#d9d9d9} -disabledforeground {#a3a3a3} \
         -foreground {#000000} -highlightbackground {#d9d9d9} \
         -highlightcolor black -justify left -state disabled \
-        -text {Uniaxial tension} -variable {isPlot[0]} 
+        -text {Uniaxial tension} -variable {gui_support.isPlot[0]} 
     vTcl:DefineAlias "$top.che38" "CheckbuttonPlotUT" vTcl:WidgetProc "Toplevel1" 1
     checkbutton $top.che41 \
         -activebackground {#d9d9d9} -activeforeground {#000000} \
         -background {#d9d9d9} -disabledforeground {#a3a3a3} \
         -foreground {#000000} -highlightbackground {#d9d9d9} \
         -highlightcolor black -justify left -state disabled \
-        -text {Equibiaxial tension} -variable {isPlot[1]} 
+        -text {Equibiaxial tension} -variable {gui_support.isPlot[1]} 
     vTcl:DefineAlias "$top.che41" "CheckbuttonPlotET" vTcl:WidgetProc "Toplevel1" 1
     checkbutton $top.che43 \
         -activebackground {#d9d9d9} -activeforeground {#000000} \
         -background {#d9d9d9} -disabledforeground {#a3a3a3} \
         -foreground {#000000} -highlightbackground {#d9d9d9} \
         -highlightcolor black -justify left -state disabled \
-        -text {Pure shear} -variable {isPlot[2]} 
+        -text {Pure shear} -variable {gui_support.isPlot[2]} 
     vTcl:DefineAlias "$top.che43" "CheckbuttonPlotPS" vTcl:WidgetProc "Toplevel1" 1
     label $top.lab44 \
         -activebackground {#f9f9f9} -activeforeground black \
@@ -243,6 +243,12 @@ proc vTclWindow.top37 {base} {
         -foreground {#000000} -highlightbackground {#d9d9d9} \
         -highlightcolor black -text Model: 
     vTcl:DefineAlias "$top.lab39" "Label5" vTcl:WidgetProc "Toplevel1" 1
+    label $top.lab38 \
+        -activebackground {#f9f9f9} -activeforeground black \
+        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -textvariable dummy 
+    vTcl:DefineAlias "$top.lab38" "Label6" vTcl:WidgetProc "Toplevel1" 1
     ###################
     # SETTING GEOMETRY
     ###################
@@ -309,6 +315,8 @@ proc vTclWindow.top37 {base} {
         -anchor nw -bordermode ignore 
     place $top.lab39 \
         -in $top -x 20 -y 170 -anchor nw -bordermode ignore 
+    place $top.lab38 \
+        -in $top -x 30 -y 490 -anchor nw -bordermode ignore 
 
     vTcl:FireEvent $base <<Ready>>
 }
