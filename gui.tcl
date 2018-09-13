@@ -234,6 +234,15 @@ proc vTclWindow.top37 {base} {
         -foreground {#000000} -highlightbackground {#d9d9d9} \
         -highlightcolor black -text Plot: 
     vTcl:DefineAlias "$top.lab44" "Label4" vTcl:WidgetProc "Toplevel1" 1
+    ttk::combobox $top.tCo38 \
+        -state readonly -foreground {} -background {} -takefocus {} 
+    vTcl:DefineAlias "$top.tCo38" "TComboboxModel" vTcl:WidgetProc "Toplevel1" 1
+    label $top.lab39 \
+        -activebackground {#f9f9f9} -activeforeground black \
+        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -text Model: 
+    vTcl:DefineAlias "$top.lab39" "Label5" vTcl:WidgetProc "Toplevel1" 1
     ###################
     # SETTING GEOMETRY
     ###################
@@ -295,6 +304,11 @@ proc vTclWindow.top37 {base} {
         -in $top -x 110 -y 430 -anchor nw -bordermode ignore 
     place $top.lab44 \
         -in $top -x 30 -y 400 -anchor nw -bordermode ignore 
+    place $top.tCo38 \
+        -in $top -x 80 -y 170 -width 407 -relwidth 0 -height 26 -relheight 0 \
+        -anchor nw -bordermode ignore 
+    place $top.lab39 \
+        -in $top -x 20 -y 170 -anchor nw -bordermode ignore 
 
     vTcl:FireEvent $base <<Ready>>
 }

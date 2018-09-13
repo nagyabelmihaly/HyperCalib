@@ -13,6 +13,9 @@
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <InterpreterId>Global|PythonCore|3.7-32</InterpreterId>
     <IsWindowsApplication>False</IsWindowsApplication>
+    <InterpreterArguments>
+    </InterpreterArguments>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -26,7 +29,13 @@
     <Compile Include="gui.py" />
     <Compile Include="gui_support.py" />
     <Compile Include="input_generator.py" />
-    <Compile Include="ogden.py" />
+    <Compile Include="ogden1.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ogden2.py" />
+    <Compile Include="ogden3.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="sandbox.py" />
   </ItemGroup>
   <ItemGroup>

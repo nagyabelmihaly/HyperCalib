@@ -1,8 +1,17 @@
-from ogden import Ogden
-from errorfuncs import MSE
+import tkinter as tk
+from tkinter import ttk
 
-model = Ogden()
-xdata = [1, 2]
-ydata = [3, 4]
-error = MSE(model.ps, model.ps_jac, model.ps_hess, xdata, ydata)
-print(error.hess([3.525, 0.2873, 8.952, 2.0597]))
+class Application(tk.Frame):
+    def __init__(self, master=None):
+        tk.Frame.__init__(self, master)
+        self.grid()
+        self.createWidgets()
+
+    def createWidgets(self):
+        self.combobox = ttk.Combobox(self, state="readonly")
+        self.combobox['values'] = ['Aladár', 'Béla', 'Cecil']
+        self.combobox.grid()
+
+app = Application()
+app.master.title('Sample application')
+app.mainloop()

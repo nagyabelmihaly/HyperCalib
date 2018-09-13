@@ -1,7 +1,14 @@
 from numpy import power, log, inf, array
 from scipy.optimize import NonlinearConstraint
 
-class Ogden:
+class Ogden2:
+    """Represents the K=2 Ogden model."""
+
+    def __init__(self):
+        self.name = "Ogden K=2"
+        self.paramnames = ["mu1", "mu2", "alpha1", "alpha2"]
+        self.paramcount = 4
+
     def ut(self, stretch, mu1, mu2, alpha1, alpha2):
         """Represents the K=2 Ogden model to uniaxial tension."""
         return mu1 * (power(stretch, alpha1 - 1) - power(stretch, -0.5 * alpha1 - 1)) + \
@@ -18,7 +25,7 @@ class Ogden:
             mu2 * (power(stretch, alpha2 - 1) - power(stretch, -alpha2 - 1))
 
     def constraint(self):
-        """Returns the constrain of the Ogden model."""
+        """Returns the constrain of the K=2 Ogden model."""
         def f(x):
             return [x[0] * x[2] + x[1] * x[3]]
         return NonlinearConstraint(f, 0, inf)

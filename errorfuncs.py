@@ -39,18 +39,6 @@ class MSE:
         return array([[2 / len(self.data) * sum([self.fjac(x, *params)[i] * self.fjac(x, *params)[j] - \
             (y - self.func(x, *params)) * self.fhess(x, *params)[i][j] for x, y in self.data]) \
             for i in range(len(params))] for j in range(len(params))])
-        #result = empty((len(params), len(params)))
-        #for i in range(len(params)):
-        #    for j in range(len(params)):
-        #        s = 0
-        #        for x, y in self.data:
-        #            fh = self.fhess(x, *params)[i][j]
-        #            ja = self.fjac(x, *params)
-        #            ji = ja[i]
-        #            jj = ja[j]
-        #            s += ji * jj - (y - self.func(x, *params)) * fh
-        #        result[i, j] = 2 / len(self.data) * s
-        #return result
 
 class WeightedError:
     def __init__(self, errors, weights):
@@ -82,19 +70,8 @@ class WeightedError:
     def hess(self, params):
         """Calculates the Hessian matrix of the objective function
         when the parameters are applied."""
-        # result = empty((len(params), len(params)))
-        # for i in range(len(params)):
-        #     for j in range(len(params)):
-        #         s = 0
-        #         for error, weight in self.factors:
-        #             s += error.hess(params)[i, j] * weight
-        #         result[i, j] = s
-        # return result
         return array([[sum(error.hess(params)[i, j] * weight \
             for error, weight in self.factors) \
             for i in range(len(params))] for j in range(len(params))])
-    
-    def hessp(self, params, p):
-        """"""
-        return self.hess(params).dot(p)
+
         

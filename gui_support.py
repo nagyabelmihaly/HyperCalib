@@ -12,7 +12,9 @@ import threading
 from scipy.optimize import minimize, BFGS
 
 import dataprocessor
-from ogden import Ogden
+from ogden1 import Ogden1
+from ogden2 import Ogden2
+from ogden3 import Ogden3
 from errorfuncs import MSE, WeightedError
 
 def init(top, gui, *args, **kwargs):
@@ -21,15 +23,27 @@ def init(top, gui, *args, **kwargs):
     top_level = top
     root = top
 
-    global model, functions, jacobians, hessians, titles, data_markers, fit_markers
-    global fit_checkbuttons, weight_entries, plot_checkbuttons
-    model = Ogden()
-    functions = [model.ut, model.et, model.ps]
-    jacobians = [model.ut_jac, model.et_jac, model.ps_jac]
-    hessians = [model.ut_hess, model.et_hess, model.ps_hess]
+    # Initialize models.
+    global models, model
+    models = [Ogden1(), Ogden2(), Ogden3()]
+    model = None
+    
+    # Initialize list of available models.
+    w.TComboboxModel['values'] = [m.name for m in models]
+    w.TComboboxModel.bind('<<ComboboxSelected>>', ComboboxSelected)
+    w.TComboboxModel.current(0)
+
+    # Initialize functions and derivatives.
+    ComboboxSelected(None)
+
+    # Initialize plotting utilities.
+    global titles, data_markers, fit_markers
     titles = ['UT', 'ET', 'PS']
     data_markers = ['bo', 'ro', 'go']
     fit_markers = ['b-', 'r-', 'g-']
+
+    # Initialize widget references.
+    global fit_checkbuttons, weight_entries, plot_checkbuttons    
     fit_checkbuttons = [w.CheckbuttonFitUT, w.CheckbuttonFitET, w.CheckbuttonFitPS]
     weight_entries = [w.EntryUT, w.EntryET, w.EntryPS]
     plot_checkbuttons = [w.CheckbuttonPlotUT, w.CheckbuttonPlotET, w.CheckbuttonPlotPS]
@@ -103,6 +117,15 @@ def ButtonProcess_Click():
     thread_dataproc.setDaemon(True)
     thread_dataproc.start()
 
+def ComboboxSelected(eventObj):
+    global model, functions, jacobians, hessians, params
+    if model != models[w.TComboboxModel.current()]:
+        params = None
+        model = models[w.TComboboxModel.current()]
+        functions = [model.ut, model.et, model.ps]
+        jacobians = [model.ut_jac, model.et_jac, model.ps_jac]
+        hessians = [model.ut_hess, model.et_hess, model.ps_hess]
+
 def ButtonFitModel_Click():
     # Start a background thread to fit model parameters.
     thread_fitmodel = threading.Thread(target=fit_model)
@@ -135,14 +158,13 @@ def fit_model():
     except ValueError:
         messagebox.showerror('Error', 'Weights must be real numbers.')
         return
-    global errors, weighted_error
+    global errors, weighted_error, functions, jacobians, hessians
     errors = [MSE(functions[i], jacobians[i], hessians[i], xdatas[i], ydatas[i]) \
         if xdatas[i] is not None else None for i in range(3)]
-    #print(errors[2].hess([3.525, 0.2873, 8.952, 2.0597]))
     weighted_error = WeightedError(errors, weights)
-    minimize(weighted_error.objfunc, [1.0] * 4, method='trust-constr', \
+    minimize(weighted_error.objfunc, [1.0] * model.paramcount, method='trust-constr', \
                    constraints=model.constraint(), \
-                   jac=weighted_error.jac, hess=weighted_error.hess,
+                   jac="2-point", hess=BFGS(),
                    callback=update_model,
                    options={'maxiter':10000, 'disp': True})
 
@@ -172,11 +194,13 @@ def plot(i):
         xlin = np.linspace(min(xdata), max(xdata))
         plt.plot(xlin, functions[defmode](xlin, *params), fit_markers[defmode])    
 
-    if params is not None:
+    if params is None:
+        # Clear Text widget.
+        set_text(w.TextParameters, '')
+    else:
         # Write parameters and weighted error to Text widget.
-        set_text(w.TextParameters,
-                 'mu1 = {}\nmu2 = {}\nalpha1 = {}\nalpha2 = {}\n\nerror = {}'.format(*params,
-                    weighted_error.objfunc(params)))
+        set_text(w.TextParameters, '\n'.join(['{} = {}'.format(model.paramnames[i], params[i]) \
+           for i in range(model.paramcount)]) + '\n\nerror = {}'.format(weighted_error.objfunc(params)))
 
     if not is_empty:        
         plt.set_xlabel('stretch')
