@@ -1,6 +1,8 @@
 from numpy import array, dot, empty
 
 class MSE:
+    name = "Mean Squared Error"
+
     def __init__(self, func, jac, hess, xdata, ydata):
         """Initializes a MSE instance whose objective function
         calculates the mean squared error between the given
@@ -22,7 +24,7 @@ class MSE:
         """Returns the MSE when the parameters are applied."""
         error = 0
         for x, y in self.data:
-            error += (y - self.func(x, *params)) ** 2
+            error += (self.func(x, *params) - y) ** 2
         return error / len(self.data)
     
     def jac(self, params):
@@ -30,14 +32,40 @@ class MSE:
         when the parameters are applied."""
         result = array([0.0] * len(params))
         for x, y in self.data:
-            result -= (y - self.func(x, *params)) * self.fjac(x, *params)
-        return result * 2 / len(self.data)
+            result += 2 * (self.func(x, *params) - y) * self.fjac(x, *params)
+        return result / len(self.data)
     
     def hess(self, params):
         """Calculates the Hessian matrix of the objective function
         when the parameters are applied."""
-        return array([[2 / len(self.data) * sum([self.fjac(x, *params)[i] * self.fjac(x, *params)[j] - \
-            (y - self.func(x, *params)) * self.fhess(x, *params)[i][j] for x, y in self.data]) \
+        return array([[2 / len(self.data) * sum([self.fjac(x, *params)[i] * self.fjac(x, *params)[j] + \
+            (self.func(x, *params) - y) * self.fhess(x, *params)[i][j] for x, y in self.data]) \
+            for i in range(len(params))] for j in range(len(params))])
+
+class MSRE:
+    name = "Mean Squared Relative Error"
+
+    def __init__(self, func, jac, hess, xdata, ydata):
+        self.func = func
+        self.fjac = jac
+        self.fhess = hess
+        self.data = list(zip(xdata, ydata))
+
+    def objfunc(self, params):
+        error = 0
+        for x, y in self.data:
+            error += ((self.func(x, *params) - y) / x) ** 2
+        return error / len(self.data)
+
+    def jac(self, params):
+        result = array([0.0] * len(params))
+        for x, y in self.data:
+            result += 2 / x ** 2 * (self.func(x, *params) - y) * self.fjac(x, *params)
+        return result / len(self.data)
+
+    def hess(self, params):
+        return array([[2 / len(self.data) * sum([1 / x ** 2 * (self.fjac(x, *params)[i] * self.fjac(x, *params)[j] + \
+            (self.func(x, *params) - y) * self.fhess(x, *params)[i][j] for x, y in self.data)]) \
             for i in range(len(params))] for j in range(len(params))])
 
 class WeightedError:

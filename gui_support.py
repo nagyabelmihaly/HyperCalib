@@ -12,10 +12,13 @@ import threading
 from scipy.optimize import minimize, BFGS
 
 import dataprocessor
+from errorfuncs import MSE, MSRE, WeightedError
+
 from ogden1 import Ogden1
 from ogden2 import Ogden2
 from ogden3 import Ogden3
-from errorfuncs import MSE, WeightedError
+from neo_hooke import NeoHooke
+from mooney_rivlin import MooneyRivlin
 
 class GuiSupport:
 
@@ -25,16 +28,30 @@ class GuiSupport:
         self.root = top
 
         # Initialize models.
-        self.models = [Ogden1(), Ogden2(), Ogden3()]
+        self.models = [Ogden1(), Ogden2(), Ogden3(), NeoHooke(), MooneyRivlin()]
         self.model = None
+
+        # Initialize errors.
+        self.error_functions = [MSE, MSRE]
+        self.error_function = None
+        self.errors = [None] * 3
+        self.weighted_error = None
     
         # Initialize list of available models.
         self.w.TComboboxModel['values'] = [m.name for m in self.models]
-        self.w.TComboboxModel.bind('<<ComboboxSelected>>', self.ComboboxSelected)
+        self.w.TComboboxModel.bind('<<ComboboxSelected>>', self.ComboboxModelSelected)
         self.w.TComboboxModel.current(0)
 
+        # Initialize list of available error functions.
+        self.w.TComboboxError['values'] = [e.name for e in self.error_functions]
+        self.w.TComboboxError.bind('<<ComboboxSelected>>', self.ComboboxErrorSelected)
+        self.w.TComboboxError.current(0)
+
         # Initialize functions and derivatives.
-        self.ComboboxSelected(None)
+        self.ComboboxModelSelected(None)
+
+        # Initialize error functions.
+        self.ComboboxErrorSelected(None)
 
         # Initialize plotting utilities.
         self.titles = ['UT', 'ET', 'PS']
@@ -70,10 +87,6 @@ class GuiSupport:
         self.xdatas = [None] * 3
         self.ydatas = [None] * 3
 
-        # Initialize error variables.
-        self.errors = [None] * 3
-        self.weighted_error = None
-
         # Initialize parameters variable.
         self.params = None
 
@@ -103,14 +116,22 @@ class GuiSupport:
         thread_dataproc.setDaemon(True)
         thread_dataproc.start()
         
-    def ComboboxSelected(self, eventObj):
-        if self.model == self.models[self.w.TComboboxModel.current()]:
+    def ComboboxModelSelected(self, eventObj):
+        current_model = self.w.TComboboxModel.current()
+        if self.model == self.models[current_model]:
             return
         self.params = None
-        self.model = self.models[self.w.TComboboxModel.current()]
+        self.model = self.models[current_model]
         self.functions = [self.model.ut, self.model.et, self.model.ps]
         self.jacobians = [self.model.ut_jac, self.model.et_jac, self.model.ps_jac]
         self.hessians = [self.model.ut_hess, self.model.et_hess, self.model.ps_hess]
+
+    def ComboboxErrorSelected(self, evetObj):
+        current_error_function = self.w.TComboboxError.current()
+        if self.error_function == self.error_functions[current_error_function]:
+            return
+        self.params = None
+        self.error_function = self.error_functions[current_error_function]
 
     def ButtonFitModel_Click(self):
         # Start a background thread to fit model parameters.
@@ -146,7 +167,7 @@ class GuiSupport:
         except ValueError:
             messagebox.showerror('Error', 'Weights must be real numbers.')
             return
-        self.errors = [MSE(self.functions[i], self.jacobians[i], self.hessians[i],
+        self.errors = [self.error_function(self.functions[i], self.jacobians[i], self.hessians[i],
                            self.xdatas[i], self.ydatas[i]) \
             if self.xdatas[i] is not None else None for i in range(3)]
         self.weighted_error = WeightedError(self.errors, weights)

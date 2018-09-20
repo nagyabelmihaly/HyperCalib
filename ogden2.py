@@ -7,7 +7,7 @@ class Ogden2:
     def __init__(self):
         self.name = "Ogden K=2"
         self.paramnames = ["mu1", "mu2", "alpha1", "alpha2"]
-        self.paramcount = 4
+        self.paramcount = len(self.paramnames)
 
     def ut(self, stretch, mu1, mu2, alpha1, alpha2):
         """Represents the K=2 Ogden model to uniaxial tension."""

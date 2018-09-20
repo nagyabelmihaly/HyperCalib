@@ -29,6 +29,12 @@
     <Compile Include="gui.py" />
     <Compile Include="gui_support.py" />
     <Compile Include="input_generator.py" />
+    <Compile Include="mooney_rivlin.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="neo_hooke.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ogden1.py">
       <SubType>Code</SubType>
     </Compile>
