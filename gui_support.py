@@ -12,7 +12,10 @@ import threading
 from scipy.optimize import minimize, BFGS
 
 import dataprocessor
-from errorfuncs import MSE, MSRE, WeightedError
+
+from mse import MSE
+from msre import MSRE
+from weighted_error import WeightedError
 
 from ogden1 import Ogden1
 from ogden2 import Ogden2
@@ -66,6 +69,9 @@ class GuiSupport:
         # Initialize default texts.
         self.set_entry(self.w.EntryFilename, 'data/TRELOARUT.csv')
         self.set_entry(self.w.EntryDelimiter, ',')
+        self.set_entry(self.w.EntryXtol, '1e-8')
+        self.set_entry(self.w.EntryGtol, '1e-8')
+        self.set_entry(self.w.EntryIterations, '1000')
 
         # Initialize a Figure for plotting.
         fig = Figure(figsize=(5, 2), dpi=100)
@@ -81,7 +87,7 @@ class GuiSupport:
         self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
         # Add animation to plot interactively.
-        self.ani = animation.FuncAnimation(fig, self.plot, interval=500)
+        #self.ani = animation.FuncAnimation(fig, self.plot, interval=500)
 
         # Initialize data variables.
         self.xdatas = [None] * 3
@@ -94,6 +100,8 @@ class GuiSupport:
         self.radiovar = tk.IntVar()
         self.isFit = [tk.BooleanVar() for i in range(3)]
         self.isPlot = [tk.BooleanVar() for i in range(3)]
+        self.calcJac = tk.BooleanVar()
+        self.calcHess = tk.BooleanVar()
 
     def ButtonProcess_Click(self):
         # Read file parsing parameters from GUI.
@@ -158,6 +166,7 @@ class GuiSupport:
         self.w.ButtonFitModel.config(state=tk.NORMAL)
         self.plot_checkbuttons[defmode].config(state=tk.NORMAL)
         self.isPlot[defmode].set(True)
+        self.plot(None)
 
     def fit_model(self):
         try:
@@ -167,19 +176,46 @@ class GuiSupport:
         except ValueError:
             messagebox.showerror('Error', 'Weights must be real numbers.')
             return
+        try:
+            xtol = float(self.w.EntryXtol.get().strip())
+        except ValueError:
+            messagebox.showerror('Error', 'Xtol must be a real number.')
+            return
+        try:
+            gtol = float(self.w.EntryGtol.get().strip())
+        except ValueError:
+            messagebox.showerror('Error', 'Gtol must be a real number.')
+            return
+        try:
+            iterations = int(self.w.EntryIterations.get().strip())
+            if iterations < 1:
+                raise ValueError
+        except ValueError:
+            messagebox.showerror('Error', 'Number of iterations must be a positive integer.')
         self.errors = [self.error_function(self.functions[i], self.jacobians[i], self.hessians[i],
                            self.xdatas[i], self.ydatas[i]) \
             if self.xdatas[i] is not None else None for i in range(3)]
         self.weighted_error = WeightedError(self.errors, weights)
+        if self.calcJac.get():
+            jac = self.weighted_error.jac
+        else:
+            jac = '2-point'
+        if self.calcHess.get():
+            hess = self.weighted_error.hess
+        else:
+            hess = BFGS()
         minimize(self.weighted_error.objfunc, [1.0] * self.model.paramcount,
                  method='trust-constr',
                  constraints=self.model.constraint(),
-                 jac="2-point", hess=BFGS(),
+                 jac=jac, hess=hess,
                  callback=self.update_model,
-                 options={'maxiter':10000, 'disp': True})
+                 options={'xtol': xtol, 'gtol': gtol, 'maxiter': iterations, 'disp': True})
+        self.plot(None)
 
     def update_model(self, xk, state):
         self.params = xk
+        if state.niter % 100 == 0:
+            self.plot(None)
 
     def plot(self, i):
         self.plt.clear()
@@ -214,8 +250,8 @@ class GuiSupport:
                 '\n\nerror = {}'.format(self.weighted_error.objfunc(self.params)))
 
         if not is_empty:        
-            self.plt.set_xlabel('stretch')
-            self.plt.set_ylabel('pressure')
+            self.plt.set_xlabel('engineering stretch')
+            self.plt.set_ylabel('engineering stress')
             self.plt.legend()
             self.canvas.draw()
             self.toolbar.update()

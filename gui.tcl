@@ -18,6 +18,7 @@ set vTcl(actual_gui_menu_active_bg)  #d8d8d8
 set vTcl(active_menu_fg) #000000
 }
 
+#############################################################################
 #################################
 #LIBRARY PROCEDURES
 #
@@ -65,10 +66,10 @@ proc vTclWindow.top37 {base} {
     # CREATING WIDGETS
     ###################
     vTcl::widgets::core::toplevel::createCmd $top -class Toplevel \
-        -background {#d9d9d9} -highlightbackground {#d9d9d9} \
+        -menu "$top.m50" -background {#d9d9d9} -highlightbackground {#d9d9d9} \
         -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 997x579+473+263
+    wm geometry $top 1207x602+288+299
     update
     # set in toplevel.wgt.
     global vTcl
@@ -101,8 +102,8 @@ proc vTclWindow.top37 {base} {
         -text {Process File} 
     vTcl:DefineAlias "$top.but38" "ButtonProcess" vTcl:WidgetProc "Toplevel1" 1
     frame $top.fra38 \
-        -borderwidth 2 -relief groove -background {#d9d9d9} -height 255 \
-        -highlightbackground {#d9d9d9} -highlightcolor black -width 470 
+        -borderwidth 2 -relief groove -background {#d9d9d9} -height 290 \
+        -highlightbackground {#d9d9d9} -highlightcolor black -width 680 
     vTcl:DefineAlias "$top.fra38" "FramePlot" vTcl:WidgetProc "Toplevel1" 1
     entry $top.ent40 \
         -background white -disabledforeground {#a3a3a3} -font TkFixedFont \
@@ -117,8 +118,8 @@ proc vTclWindow.top37 {base} {
         -highlightcolor black -text Samples: 
     vTcl:DefineAlias "$top.lab41" "Label2" vTcl:WidgetProc "Toplevel1" 1
     frame $top.fra42 \
-        -borderwidth 2 -relief groove -background {#d9d9d9} -height 35 \
-        -highlightbackground {#d9d9d9} -highlightcolor black -width 465 
+        -borderwidth 2 -relief groove -background {#d9d9d9} -height 40 \
+        -highlightbackground {#d9d9d9} -highlightcolor black -width 680 
     vTcl:DefineAlias "$top.fra42" "FrameNavigation" vTcl:WidgetProc "Toplevel1" 1
     label $top.lab43 \
         -activebackground {#f9f9f9} -activeforeground black -anchor nw \
@@ -161,10 +162,10 @@ proc vTclWindow.top37 {base} {
         -state disabled -text {Fit model} 
     vTcl:DefineAlias "$top.but45" "ButtonFitModel" vTcl:WidgetProc "Toplevel1" 1
     text $top.tex38 \
-        -background white -font TkTextFont -foreground {#000000} -height 204 \
+        -background white -font TkTextFont -foreground {#000000} -height 174 \
         -highlightbackground {#d9d9d9} -highlightcolor black \
         -insertbackground black -selectbackground {#c4c4c4} \
-        -selectforeground black -state disabled -width 460 -wrap word 
+        -selectforeground black -state disabled -width 675 -wrap word 
     .top37.tex38 configure -font TkTextFont
     .top37.tex38 insert end text
     vTcl:DefineAlias "$top.tex38" "TextParameters" vTcl:WidgetProc "Toplevel1" 1
@@ -258,6 +259,60 @@ proc vTclWindow.top37 {base} {
     ttk::combobox $top.tCo43 \
         -state readonly -foreground {} -background {} -takefocus {} 
     vTcl:DefineAlias "$top.tCo43" "TComboboxError" vTcl:WidgetProc "Toplevel1" 1
+    label $top.lab47 \
+        -activebackground {#f9f9f9} -activeforeground black -anchor nw \
+        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -text gtol: 
+    vTcl:DefineAlias "$top.lab47" "Label10" vTcl:WidgetProc "Toplevel1" 1
+    label $top.lab48 \
+        -activebackground {#f9f9f9} -activeforeground black -anchor nw \
+        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -text xtol: 
+    vTcl:DefineAlias "$top.lab48" "Label11" vTcl:WidgetProc "Toplevel1" 1
+    label $top.lab49 \
+        -activebackground {#f9f9f9} -activeforeground black -anchor nw \
+        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -text Iterations: 
+    vTcl:DefineAlias "$top.lab49" "Label12" vTcl:WidgetProc "Toplevel1" 1
+    set site_3_0 $top.m50
+    menu $site_3_0 \
+        -activebackground {#d8d8d8} -activeforeground {#000000} \
+        -background {#d9d9d9} -font font9 -foreground {#000000} -tearoff 0 
+    checkbutton $top.che51 \
+        -activebackground {#d9d9d9} -activeforeground {#000000} -anchor nw \
+        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -justify left -text {Calculate Jacobian} \
+        -variable gui_support.calcJac 
+    vTcl:DefineAlias "$top.che51" "CheckbuttonJac" vTcl:WidgetProc "Toplevel1" 1
+    checkbutton $top.che52 \
+        -activebackground {#d9d9d9} -activeforeground {#000000} -anchor nw \
+        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -justify left -text {Calculate Hessian} \
+        -variable gui_support.calcHess 
+    vTcl:DefineAlias "$top.che52" "CheckbuttonHess" vTcl:WidgetProc "Toplevel1" 1
+    entry $top.ent53 \
+        -background white -disabledforeground {#a3a3a3} -font font10 \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -insertbackground black \
+        -selectbackground {#c4c4c4} -selectforeground black 
+    vTcl:DefineAlias "$top.ent53" "EntryIterations" vTcl:WidgetProc "Toplevel1" 1
+    entry $top.ent54 \
+        -background white -disabledforeground {#a3a3a3} -font font10 \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -insertbackground black \
+        -selectbackground {#c4c4c4} -selectforeground black 
+    vTcl:DefineAlias "$top.ent54" "EntryXtol" vTcl:WidgetProc "Toplevel1" 1
+    entry $top.ent55 \
+        -background white -disabledforeground {#a3a3a3} -font font10 \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -insertbackground black \
+        -selectbackground {#c4c4c4} -selectforeground black 
+    vTcl:DefineAlias "$top.ent55" "EntryGtol" vTcl:WidgetProc "Toplevel1" 1
     ###################
     # SETTING GEOMETRY
     ###################
@@ -270,15 +325,15 @@ proc vTclWindow.top37 {base} {
         -in $top -x 20 -y 120 -width 470 -relwidth 0 -height 26 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.fra38 \
-        -in $top -x -20 -relx 1 -y -70 -rely 1 -relwidth 0.45 -relheight 0.4 \
-        -anchor se -bordermode ignore 
+        -in $top -x 510 -y 210 -width 680 -relwidth 0 -height 290 \
+        -relheight 0 -anchor nw -bordermode ignore 
     place $top.ent40 \
         -in $top -x 100 -y 50 -anchor nw -bordermode ignore 
     place $top.lab41 \
         -in $top -x 20 -y 50 -anchor nw -bordermode ignore 
     place $top.fra42 \
-        -in $top -x -20 -relx 1 -y -20 -rely 1 -width 0 -relwidth 0.45 \
-        -relheight 0.07 -anchor se -bordermode ignore 
+        -in $top -x 510 -y 510 -width 680 -relwidth 0 -height 40 -relheight 0 \
+        -anchor nw -bordermode ignore 
     place $top.lab43 \
         -in $top -x 20 -y 80 -anchor nw -bordermode ignore 
     place $top.ent44 \
@@ -294,31 +349,34 @@ proc vTclWindow.top37 {base} {
         -in $top -x 320 -y 80 -width 150 -relwidth 0 -height 30 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.but45 \
-        -in $top -x 20 -y 370 -width 470 -height 26 -anchor nw \
-        -bordermode ignore 
+        -in $top -x 20 -y 560 -width 470 -relwidth 0 -height 26 -relheight 0 \
+        -anchor nw -bordermode ignore 
     place $top.tex38 \
-        -in $top -x -20 -relx 1 -y 30 -relwidth 0.45 -height 204 -relheight 0 \
-        -anchor ne -bordermode ignore 
+        -in $top -x 510 -y 20 -width 675 -relwidth 0 -height 174 -relheight 0 \
+        -anchor nw -bordermode ignore 
     place $top.che39 \
-        -in $top -x 20 -y 270 -anchor nw -bordermode ignore 
+        -in $top -x 20 -y 260 -anchor nw -bordermode ignore 
     place $top.che40 \
-        -in $top -x 20 -y 300 -anchor nw -bordermode ignore 
+        -in $top -x 20 -y 290 -anchor nw -bordermode ignore 
     place $top.che42 \
-        -in $top -x 20 -y 330 -anchor nw -bordermode ignore 
+        -in $top -x 20 -y 320 -anchor nw -bordermode ignore 
     place $top.ent43 \
-        -in $top -x 280 -y 270 -anchor nw -bordermode ignore 
+        -in $top -x 190 -y 260 -width 294 -relwidth 0 -height 24 -relheight 0 \
+        -anchor nw -bordermode ignore 
     place $top.ent45 \
-        -in $top -x 280 -y 300 -anchor nw -bordermode ignore 
+        -in $top -x 190 -y 290 -width 294 -relwidth 0 -height 24 -relheight 0 \
+        -anchor nw -bordermode ignore 
     place $top.ent46 \
-        -in $top -x 280 -y 330 -anchor nw -bordermode ignore 
+        -in $top -x 190 -y 320 -width 294 -relwidth 0 -height 24 -relheight 0 \
+        -anchor nw -bordermode ignore 
     place $top.che38 \
-        -in $top -x 110 -y 460 -anchor nw -bordermode ignore 
+        -in $top -x 620 -y 560 -anchor nw -bordermode ignore 
     place $top.che41 \
-        -in $top -x 110 -y 490 -anchor nw -bordermode ignore 
+        -in $top -x 830 -y 560 -anchor nw -bordermode ignore 
     place $top.che43 \
-        -in $top -x 110 -y 520 -anchor nw -bordermode ignore 
+        -in $top -x 1040 -y 560 -anchor nw -bordermode ignore 
     place $top.lab44 \
-        -in $top -x 50 -y 490 -anchor nw -bordermode ignore 
+        -in $top -x 520 -y 560 -anchor nw -bordermode ignore 
     place $top.tCo38 \
         -in $top -x 130 -y 170 -width 357 -relwidth 0 -height 26 -relheight 0 \
         -anchor nw -bordermode ignore 
@@ -330,6 +388,25 @@ proc vTclWindow.top37 {base} {
         -in $top -x 20 -y 200 -anchor nw -bordermode ignore 
     place $top.tCo43 \
         -in $top -x 130 -y 200 -width 357 -relwidth 0 -height 26 -relheight 0 \
+        -anchor nw -bordermode ignore 
+    place $top.lab47 \
+        -in $top -x 30 -y 470 -anchor nw -bordermode ignore 
+    place $top.lab48 \
+        -in $top -x 30 -y 440 -anchor nw -bordermode ignore 
+    place $top.lab49 \
+        -in $top -x 30 -y 500 -anchor nw -bordermode ignore 
+    place $top.che51 \
+        -in $top -x 20 -y 390 -anchor nw -bordermode ignore 
+    place $top.che52 \
+        -in $top -x 230 -y 390 -anchor nw -bordermode ignore 
+    place $top.ent53 \
+        -in $top -x 190 -y 500 -width 294 -relwidth 0 -height 24 -relheight 0 \
+        -anchor nw -bordermode ignore 
+    place $top.ent54 \
+        -in $top -x 190 -y 440 -width 294 -relwidth 0 -height 24 -relheight 0 \
+        -anchor nw -bordermode ignore 
+    place $top.ent55 \
+        -in $top -x 190 -y 470 -width 294 -relwidth 0 -height 24 -relheight 0 \
         -anchor nw -bordermode ignore 
 
     vTcl:FireEvent $base <<Ready>>
