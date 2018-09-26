@@ -1,4 +1,4 @@
-from numpy import array, dot, empty, sqrt
+from numpy import array, zeros, sqrt, matmul, transpose
 
 class MSRE:
     name = "Mean Squared Relative Error"
@@ -8,24 +8,25 @@ class MSRE:
         self.fjac = jac
         self.fhess = hess
         self.data = list(zip(xdata, ydata))
+        self.n = len(self.data)
 
     def objfunc(self, params):
         error = 0
         for x, y in self.data:
-            if y == 0:
-                continue
             error += ((self.func(x, *params) - y) / y) ** 2
         return sqrt(error / len(self.data))
 
     def jac(self, params):
-        raise NotImplementedError()
-        result = array([0.0] * len(params))
+        result = zeros(len(params))
         for x, y in self.data:
-            result += 2 / x ** 2 * (self.func(x, *params) - y) * self.fjac(x, *params)
-        return result / len(self.data)
+            result += (self.func(x, *params) - y) / y ** 2 * self.fjac(x, *params)
+        return result / (self.n * self.objfunc(params))
 
     def hess(self, params):
-        raise NotImplementedError()
-        return array([[2 / len(self.data) * sum([1 / x ** 2 * (self.fjac(x, *params)[i] * self.fjac(x, *params)[j] + \
-            (self.func(x, *params) - y) * self.fhess(x, *params)[i][j] for x, y in self.data)]) \
-            for i in range(len(params))] for j in range(len(params))])
+        result = zeros((len(params), len(params)))
+        for x, y in self.data:
+            fj = self.fjac(x, *params)
+            result += (matmul(fj, transpose(fj)) + (self.func(x, *params) - y) * self.fhess(x, *params)) / y ** 2
+        jacobian = self.jac(params)
+        objf = self.objfunc(params)
+        return result / (self.n * objf) - matmul(jacobian, transpose(jacobian)) / objf

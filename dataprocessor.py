@@ -30,11 +30,19 @@ def process_file(filename, delimiter=',', samples=-1, columns=[Columns.STRETCH, 
             ydata.append(float(row[columns.index(Columns.PRESSURE)]))
         
         # Throw out samples which are close to each other.
-        if (samples > 1):
+        if (samples > 2):
             while len(xdata) > samples:
-                distances = [xdata[i + 2] - xdata[i] for i in range(len(xdata) - 3)]
+                distances = [xdata[i + 2] - xdata[i] for i in range(len(xdata) - 2)]
                 minindex = distances.index(min(distances)) + 1
                 del xdata[minindex]
                 del ydata[minindex]
+        elif samples == 2:
+            # Keep the first and the last samples.
+            xdata = [xdata[0], xdata[-1]]
+            ydata = [ydata[0], ydata[-1]]
+        elif samples == 1:
+            # Keep the last sample.
+            xdata = [xdata[-1]]
+            ydata = [ydata[-1]]
 
         return xdata, ydata

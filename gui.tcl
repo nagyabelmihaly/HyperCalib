@@ -69,7 +69,7 @@ proc vTclWindow.top37 {base} {
         -menu "$top.m50" -background {#d9d9d9} -highlightbackground {#d9d9d9} \
         -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 1207x602+288+299
+    wm geometry $top 1531x602+72+197
     update
     # set in toplevel.wgt.
     global vTcl
@@ -102,8 +102,8 @@ proc vTclWindow.top37 {base} {
         -text {Process File} 
     vTcl:DefineAlias "$top.but38" "ButtonProcess" vTcl:WidgetProc "Toplevel1" 1
     frame $top.fra38 \
-        -borderwidth 2 -relief groove -background {#d9d9d9} -height 290 \
-        -highlightbackground {#d9d9d9} -highlightcolor black -width 680 
+        -borderwidth 2 -relief groove -background {#d9d9d9} -height 280 \
+        -highlightbackground {#d9d9d9} -highlightcolor black -width 500 
     vTcl:DefineAlias "$top.fra38" "FramePlot" vTcl:WidgetProc "Toplevel1" 1
     entry $top.ent40 \
         -background white -disabledforeground {#a3a3a3} -font TkFixedFont \
@@ -119,8 +119,8 @@ proc vTclWindow.top37 {base} {
     vTcl:DefineAlias "$top.lab41" "Label2" vTcl:WidgetProc "Toplevel1" 1
     frame $top.fra42 \
         -borderwidth 2 -relief groove -background {#d9d9d9} -height 40 \
-        -highlightbackground {#d9d9d9} -highlightcolor black -width 680 
-    vTcl:DefineAlias "$top.fra42" "FrameNavigation" vTcl:WidgetProc "Toplevel1" 1
+        -highlightbackground {#d9d9d9} -highlightcolor black -width 500 
+    vTcl:DefineAlias "$top.fra42" "FrameNavigationPlot" vTcl:WidgetProc "Toplevel1" 1
     label $top.lab43 \
         -activebackground {#f9f9f9} -activeforeground black -anchor nw \
         -background {#d9d9d9} -disabledforeground {#a3a3a3} \
@@ -162,13 +162,13 @@ proc vTclWindow.top37 {base} {
         -state disabled -text {Fit model} 
     vTcl:DefineAlias "$top.but45" "ButtonFitModel" vTcl:WidgetProc "Toplevel1" 1
     text $top.tex38 \
-        -background white -font TkTextFont -foreground {#000000} -height 174 \
+        -background white -font TkTextFont -foreground {#000000} -height 194 \
         -highlightbackground {#d9d9d9} -highlightcolor black \
         -insertbackground black -selectbackground {#c4c4c4} \
-        -selectforeground black -state disabled -width 675 -wrap word 
+        -selectforeground black -state disabled -width 615 -wrap word 
     .top37.tex38 configure -font TkTextFont
     .top37.tex38 insert end text
-    vTcl:DefineAlias "$top.tex38" "TextParameters" vTcl:WidgetProc "Toplevel1" 1
+    vTcl:DefineAlias "$top.tex38" "TextLog" vTcl:WidgetProc "Toplevel1" 1
     checkbutton $top.che39 \
         -activebackground {#d9d9d9} -activeforeground {#000000} -anchor nw \
         -background {#d9d9d9} -disabledforeground {#a3a3a3} \
@@ -313,6 +313,22 @@ proc vTclWindow.top37 {base} {
         -highlightcolor black -insertbackground black \
         -selectbackground {#c4c4c4} -selectforeground black 
     vTcl:DefineAlias "$top.ent55" "EntryGtol" vTcl:WidgetProc "Toplevel1" 1
+    text $top.tex39 \
+        -background white -font font9 -foreground black -height 200 \
+        -highlightbackground {#d9d9d9} -highlightcolor black \
+        -insertbackground black -selectbackground {#c4c4c4} \
+        -selectforeground black -state disabled -width 500 -wrap word 
+    .top37.tex39 configure -font font9
+    .top37.tex39 insert end text
+    vTcl:DefineAlias "$top.tex39" "TextState" vTcl:WidgetProc "Toplevel1" 1
+    frame $top.fra40 \
+        -borderwidth 2 -relief groove -background {#d9d9d9} -height 275 \
+        -width 615 
+    vTcl:DefineAlias "$top.fra40" "FrameError" vTcl:WidgetProc "Toplevel1" 1
+    frame $top.fra41 \
+        -borderwidth 2 -relief groove -background {#d9d9d9} -height 35 \
+        -width 615 
+    vTcl:DefineAlias "$top.fra41" "FrameNavigationError" vTcl:WidgetProc "Toplevel1" 1
     ###################
     # SETTING GEOMETRY
     ###################
@@ -325,14 +341,14 @@ proc vTclWindow.top37 {base} {
         -in $top -x 20 -y 120 -width 470 -relwidth 0 -height 26 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.fra38 \
-        -in $top -x 510 -y 210 -width 680 -relwidth 0 -height 290 \
+        -in $top -x 510 -y 220 -width 500 -relwidth 0 -height 280 \
         -relheight 0 -anchor nw -bordermode ignore 
     place $top.ent40 \
         -in $top -x 100 -y 50 -anchor nw -bordermode ignore 
     place $top.lab41 \
         -in $top -x 20 -y 50 -anchor nw -bordermode ignore 
     place $top.fra42 \
-        -in $top -x 510 -y 510 -width 680 -relwidth 0 -height 40 -relheight 0 \
+        -in $top -x 510 -y 510 -width 500 -relwidth 0 -height 40 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.lab43 \
         -in $top -x 20 -y 80 -anchor nw -bordermode ignore 
@@ -352,8 +368,8 @@ proc vTclWindow.top37 {base} {
         -in $top -x 20 -y 560 -width 470 -relwidth 0 -height 26 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.tex38 \
-        -in $top -x 510 -y 20 -width 675 -relwidth 0 -height 174 -relheight 0 \
-        -anchor nw -bordermode ignore 
+        -in $top -x 1020 -y 10 -width 500 -relwidth 0 -height 200 \
+        -relheight 0 -anchor nw -bordermode ignore 
     place $top.che39 \
         -in $top -x 20 -y 260 -anchor nw -bordermode ignore 
     place $top.che40 \
@@ -370,11 +386,11 @@ proc vTclWindow.top37 {base} {
         -in $top -x 190 -y 320 -width 294 -relwidth 0 -height 24 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.che38 \
-        -in $top -x 620 -y 560 -anchor nw -bordermode ignore 
+        -in $top -x 590 -y 560 -anchor nw -bordermode ignore 
     place $top.che41 \
-        -in $top -x 830 -y 560 -anchor nw -bordermode ignore 
+        -in $top -x 740 -y 560 -anchor nw -bordermode ignore 
     place $top.che43 \
-        -in $top -x 1040 -y 560 -anchor nw -bordermode ignore 
+        -in $top -x 900 -y 560 -anchor nw -bordermode ignore 
     place $top.lab44 \
         -in $top -x 520 -y 560 -anchor nw -bordermode ignore 
     place $top.tCo38 \
@@ -408,6 +424,15 @@ proc vTclWindow.top37 {base} {
     place $top.ent55 \
         -in $top -x 190 -y 470 -width 294 -relwidth 0 -height 24 -relheight 0 \
         -anchor nw -bordermode ignore 
+    place $top.tex39 \
+        -in $top -x 510 -y 10 -width 500 -relwidth 0 -height 200 -relheight 0 \
+        -anchor nw -bordermode ignore 
+    place $top.fra40 \
+        -in $top -x 1020 -y 220 -width 500 -relwidth 0 -height 280 \
+        -relheight 0 -anchor nw -bordermode ignore 
+    place $top.fra41 \
+        -in $top -x 1020 -y 510 -width 500 -relwidth 0 -height 40 \
+        -relheight 0 -anchor nw -bordermode ignore 
 
     vTcl:FireEvent $base <<Ready>>
 }
