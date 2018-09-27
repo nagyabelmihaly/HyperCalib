@@ -69,7 +69,7 @@ proc vTclWindow.top37 {base} {
         -menu "$top.m50" -background {#d9d9d9} -highlightbackground {#d9d9d9} \
         -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 1531x602+72+197
+    wm geometry $top 1531x694+19+246
     update
     # set in toplevel.wgt.
     global vTcl
@@ -162,10 +162,10 @@ proc vTclWindow.top37 {base} {
         -state disabled -text {Fit model} 
     vTcl:DefineAlias "$top.but45" "ButtonFitModel" vTcl:WidgetProc "Toplevel1" 1
     text $top.tex38 \
-        -background white -font TkTextFont -foreground {#000000} -height 194 \
+        -background white -font TkTextFont -foreground {#000000} -height 330 \
         -highlightbackground {#d9d9d9} -highlightcolor black \
         -insertbackground black -selectbackground {#c4c4c4} \
-        -selectforeground black -state disabled -width 615 -wrap word 
+        -selectforeground black -state disabled -width 500 -wrap word 
     .top37.tex38 configure -font TkTextFont
     .top37.tex38 insert end text
     vTcl:DefineAlias "$top.tex38" "TextLog" vTcl:WidgetProc "Toplevel1" 1
@@ -314,7 +314,7 @@ proc vTclWindow.top37 {base} {
         -selectbackground {#c4c4c4} -selectforeground black 
     vTcl:DefineAlias "$top.ent55" "EntryGtol" vTcl:WidgetProc "Toplevel1" 1
     text $top.tex39 \
-        -background white -font font9 -foreground black -height 200 \
+        -background white -font font9 -foreground black -height 270 \
         -highlightbackground {#d9d9d9} -highlightcolor black \
         -insertbackground black -selectbackground {#c4c4c4} \
         -selectforeground black -state disabled -width 500 -wrap word 
@@ -323,12 +323,42 @@ proc vTclWindow.top37 {base} {
     vTcl:DefineAlias "$top.tex39" "TextState" vTcl:WidgetProc "Toplevel1" 1
     frame $top.fra40 \
         -borderwidth 2 -relief groove -background {#d9d9d9} -height 275 \
-        -width 615 
+        -highlightbackground {#d9d9d9} -highlightcolor black -width 615 
     vTcl:DefineAlias "$top.fra40" "FrameError" vTcl:WidgetProc "Toplevel1" 1
     frame $top.fra41 \
         -borderwidth 2 -relief groove -background {#d9d9d9} -height 35 \
-        -width 615 
+        -highlightbackground {#d9d9d9} -highlightcolor black -width 615 
     vTcl:DefineAlias "$top.fra41" "FrameNavigationError" vTcl:WidgetProc "Toplevel1" 1
+    ttk::combobox $top.tCo42 \
+        -state readonly -foreground {} -background {} -takefocus {} 
+    vTcl:DefineAlias "$top.tCo42" "TComboboxDeformation" vTcl:WidgetProc "Toplevel1" 1
+    ttk::combobox $top.tCo44 \
+        -state readonly -foreground {} -background {} -takefocus {} 
+    vTcl:DefineAlias "$top.tCo44" "TComboboxStress" vTcl:WidgetProc "Toplevel1" 1
+    label $top.lab45 \
+        -activebackground {#f9f9f9} -activeforeground black -anchor nw \
+        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -text Column: 
+    vTcl:DefineAlias "$top.lab45" "Label8" vTcl:WidgetProc "Toplevel1" 1
+    label $top.lab46 \
+        -activebackground {#f9f9f9} -activeforeground black -anchor nw \
+        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -text Column: 
+    vTcl:DefineAlias "$top.lab46" "Label9" vTcl:WidgetProc "Toplevel1" 1
+    entry $top.ent47 \
+        -background white -disabledforeground {#a3a3a3} -font font10 \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -insertbackground black \
+        -selectbackground {#c4c4c4} -selectforeground black 
+    vTcl:DefineAlias "$top.ent47" "EntryDeformation" vTcl:WidgetProc "Toplevel1" 1
+    entry $top.ent48 \
+        -background white -disabledforeground {#a3a3a3} -font font10 \
+        -foreground {#000000} -highlightbackground {#d9d9d9} \
+        -highlightcolor black -insertbackground black \
+        -selectbackground {#c4c4c4} -selectforeground black 
+    vTcl:DefineAlias "$top.ent48" "EntryStress" vTcl:WidgetProc "Toplevel1" 1
     ###################
     # SETTING GEOMETRY
     ###################
@@ -338,17 +368,17 @@ proc vTclWindow.top37 {base} {
         -in $top -x 20 -y 20 -width 70 -relwidth 0 -height 30 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.but38 \
-        -in $top -x 20 -y 120 -width 470 -relwidth 0 -height 26 -relheight 0 \
+        -in $top -x 20 -y 190 -width 470 -relwidth 0 -height 26 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.fra38 \
-        -in $top -x 510 -y 220 -width 500 -relwidth 0 -height 280 \
+        -in $top -x 510 -y 350 -width 500 -relwidth 0 -height 280 \
         -relheight 0 -anchor nw -bordermode ignore 
     place $top.ent40 \
         -in $top -x 100 -y 50 -anchor nw -bordermode ignore 
     place $top.lab41 \
         -in $top -x 20 -y 50 -anchor nw -bordermode ignore 
     place $top.fra42 \
-        -in $top -x 510 -y 510 -width 500 -relwidth 0 -height 40 -relheight 0 \
+        -in $top -x 510 -y 640 -width 500 -relwidth 0 -height 40 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.lab43 \
         -in $top -x 20 -y 80 -anchor nw -bordermode ignore 
@@ -365,74 +395,90 @@ proc vTclWindow.top37 {base} {
         -in $top -x 320 -y 80 -width 150 -relwidth 0 -height 30 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.but45 \
-        -in $top -x 20 -y 560 -width 470 -relwidth 0 -height 26 -relheight 0 \
+        -in $top -x 20 -y 650 -width 470 -relwidth 0 -height 26 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.tex38 \
-        -in $top -x 1020 -y 10 -width 500 -relwidth 0 -height 200 \
+        -in $top -x 1020 -y 10 -width 500 -relwidth 0 -height 330 \
         -relheight 0 -anchor nw -bordermode ignore 
     place $top.che39 \
-        -in $top -x 20 -y 260 -anchor nw -bordermode ignore 
+        -in $top -x 20 -y 360 -anchor nw -bordermode ignore 
     place $top.che40 \
-        -in $top -x 20 -y 290 -anchor nw -bordermode ignore 
+        -in $top -x 20 -y 390 -anchor nw -bordermode ignore 
     place $top.che42 \
-        -in $top -x 20 -y 320 -anchor nw -bordermode ignore 
+        -in $top -x 20 -y 420 -anchor nw -bordermode ignore 
     place $top.ent43 \
-        -in $top -x 190 -y 260 -width 294 -relwidth 0 -height 24 -relheight 0 \
+        -in $top -x 190 -y 360 -width 294 -relwidth 0 -height 24 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.ent45 \
-        -in $top -x 190 -y 290 -width 294 -relwidth 0 -height 24 -relheight 0 \
+        -in $top -x 190 -y 390 -width 294 -relwidth 0 -height 24 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.ent46 \
-        -in $top -x 190 -y 320 -width 294 -relwidth 0 -height 24 -relheight 0 \
+        -in $top -x 190 -y 420 -width 294 -relwidth 0 -height 24 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.che38 \
-        -in $top -x 590 -y 560 -anchor nw -bordermode ignore 
+        -in $top -x 570 -y 310 -anchor nw -bordermode ignore 
     place $top.che41 \
-        -in $top -x 740 -y 560 -anchor nw -bordermode ignore 
+        -in $top -x 730 -y 310 -anchor nw -bordermode ignore 
     place $top.che43 \
-        -in $top -x 900 -y 560 -anchor nw -bordermode ignore 
+        -in $top -x 900 -y 310 -anchor nw -bordermode ignore 
     place $top.lab44 \
-        -in $top -x 520 -y 560 -anchor nw -bordermode ignore 
+        -in $top -x 520 -y 310 -anchor nw -bordermode ignore 
     place $top.tCo38 \
-        -in $top -x 130 -y 170 -width 357 -relwidth 0 -height 26 -relheight 0 \
+        -in $top -x 130 -y 270 -width 357 -relwidth 0 -height 26 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.lab39 \
-        -in $top -x 20 -y 170 -anchor nw -bordermode ignore 
+        -in $top -x 20 -y 270 -anchor nw -bordermode ignore 
     place $top.lab38 \
         -in $top -x 30 -y 490 -anchor nw -bordermode ignore 
     place $top.lab42 \
-        -in $top -x 20 -y 200 -anchor nw -bordermode ignore 
+        -in $top -x 20 -y 300 -anchor nw -bordermode ignore 
     place $top.tCo43 \
-        -in $top -x 130 -y 200 -width 357 -relwidth 0 -height 26 -relheight 0 \
+        -in $top -x 130 -y 300 -width 357 -relwidth 0 -height 26 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.lab47 \
-        -in $top -x 30 -y 470 -anchor nw -bordermode ignore 
+        -in $top -x 30 -y 570 -anchor nw -bordermode ignore 
     place $top.lab48 \
-        -in $top -x 30 -y 440 -anchor nw -bordermode ignore 
+        -in $top -x 30 -y 540 -anchor nw -bordermode ignore 
     place $top.lab49 \
-        -in $top -x 30 -y 500 -anchor nw -bordermode ignore 
+        -in $top -x 30 -y 600 -anchor nw -bordermode ignore 
     place $top.che51 \
-        -in $top -x 20 -y 390 -anchor nw -bordermode ignore 
+        -in $top -x 20 -y 490 -anchor nw -bordermode ignore 
     place $top.che52 \
-        -in $top -x 230 -y 390 -anchor nw -bordermode ignore 
+        -in $top -x 230 -y 490 -anchor nw -bordermode ignore 
     place $top.ent53 \
-        -in $top -x 190 -y 500 -width 294 -relwidth 0 -height 24 -relheight 0 \
+        -in $top -x 190 -y 600 -width 294 -relwidth 0 -height 24 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.ent54 \
-        -in $top -x 190 -y 440 -width 294 -relwidth 0 -height 24 -relheight 0 \
+        -in $top -x 190 -y 540 -width 294 -relwidth 0 -height 24 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.ent55 \
-        -in $top -x 190 -y 470 -width 294 -relwidth 0 -height 24 -relheight 0 \
+        -in $top -x 190 -y 570 -width 294 -relwidth 0 -height 24 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.tex39 \
-        -in $top -x 510 -y 10 -width 500 -relwidth 0 -height 200 -relheight 0 \
+        -in $top -x 510 -y 10 -width 500 -relwidth 0 -height 270 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.fra40 \
-        -in $top -x 1020 -y 220 -width 500 -relwidth 0 -height 280 \
+        -in $top -x 1020 -y 350 -width 500 -relwidth 0 -height 280 \
         -relheight 0 -anchor nw -bordermode ignore 
     place $top.fra41 \
-        -in $top -x 1020 -y 510 -width 500 -relwidth 0 -height 40 \
+        -in $top -x 1020 -y 640 -width 500 -relwidth 0 -height 40 \
         -relheight 0 -anchor nw -bordermode ignore 
+    place $top.tCo42 \
+        -in $top -x 20 -y 120 -width 247 -relwidth 0 -height 26 -relheight 0 \
+        -anchor nw -bordermode ignore 
+    place $top.tCo44 \
+        -in $top -x 20 -y 150 -width 247 -relwidth 0 -height 26 -relheight 0 \
+        -anchor nw -bordermode ignore 
+    place $top.lab45 \
+        -in $top -x 280 -y 120 -anchor nw -bordermode ignore 
+    place $top.lab46 \
+        -in $top -x 280 -y 150 -anchor nw -bordermode ignore 
+    place $top.ent47 \
+        -in $top -x 360 -y 120 -width 114 -relwidth 0 -height 24 -relheight 0 \
+        -anchor nw -bordermode ignore 
+    place $top.ent48 \
+        -in $top -x 360 -y 150 -width 114 -relwidth 0 -height 24 -relheight 0 \
+        -anchor nw -bordermode ignore 
 
     vTcl:FireEvent $base <<Ready>>
 }

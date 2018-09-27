@@ -14,6 +14,8 @@ from datetime import datetime
 from time import process_time
 
 import dataprocessor
+from deformation import EngineeringStrain, Stretch, TrueStrain
+from stress import EngineeringStress, TrueStress
 
 from mse import MSE
 from msre import MSRE
@@ -28,6 +30,7 @@ from mooney_rivlin import MooneyRivlin
 class GuiSupport:
 
     def Init(self, top, gui):
+        """Initializes the window with the widgets inside."""
         self.w = gui
         self.top_level = top
         self.root = top
@@ -68,6 +71,10 @@ class GuiSupport:
         self.toolbarErr = NavigationToolbar2Tk(self.canvasErr, self.w.FrameNavigationError)
         self.canvasErr._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+        # Initialize deformation and stress quantities.
+        self.deformation_quantities = [EngineeringStrain(), Stretch(), TrueStrain()]
+        self.stress_quantities = [EngineeringStress(), TrueStress()]
+
         # Initialize models.
         self.models = [Ogden1(), Ogden2(), Ogden3(), NeoHooke(), MooneyRivlin()]
         self.model = None
@@ -88,6 +95,14 @@ class GuiSupport:
         self.w.TComboboxError.bind('<<ComboboxSelected>>', self.ComboboxErrorSelected)
         self.w.TComboboxError.current(0)
 
+        # Initialize list of available deformation quantities.
+        self.w.TComboboxDeformation['values'] = [d.name for d in self.deformation_quantities]
+        self.w.TComboboxDeformation.current(0)
+
+        # Initialize list of available stress quantities.
+        self.w.TComboboxStress['values'] = [s.name for s in self.stress_quantities]
+        self.w.TComboboxStress.current(0)
+
         # Initialize functions and derivatives.
         self.ComboboxModelSelected(None)
 
@@ -107,12 +122,15 @@ class GuiSupport:
         # Initialize default texts.
         self.set_entry(self.w.EntryFilename, 'data/TRELOARUT.csv')
         self.set_entry(self.w.EntryDelimiter, ',')
+        self.set_entry(self.w.EntryDeformation, '0')
+        self.set_entry(self.w.EntryStress, '1')
         self.set_entry(self.w.EntryXtol, '1e-8')
         self.set_entry(self.w.EntryGtol, '1e-8')
         self.set_entry(self.w.EntryIterations, '1000')
         [self.set_entry(entry, '1') for entry in self.weight_entries]
 
-    def SetTkVar(self):        
+    def SetTkVar(self):      
+        """Sets the TkInter variables referenced by the widgets."""
         self.radiovar = tk.IntVar()
         self.isFit = [tk.BooleanVar() for i in range(3)]
         self.isPlot = [tk.BooleanVar() for i in range(3)]
@@ -136,7 +154,7 @@ class GuiSupport:
         self.hessians = [self.model.ut_hess, self.model.et_hess, self.model.ps_hess]
         self.plot()
 
-    def ComboboxErrorSelected(self, evetObj):
+    def ComboboxErrorSelected(self, eventObj):
         current_error_function = self.w.TComboboxError.current()
         if self.error_function == self.error_functions[current_error_function]:
             return
@@ -151,6 +169,13 @@ class GuiSupport:
         thread_fitmodel.start()
 
     def set_state(self, isNormal):
+        """Sets the state of all the input widgets normal
+        or disabled/readonly according to the given parameter.
+        ----------
+        Keyword arguments:
+        isNormal -- True, if widgets should be normal (active);
+                    otherwise, false.
+        """
         if isNormal:
             state = tk.NORMAL
             combobox_state = 'readonly'
@@ -191,12 +216,12 @@ class GuiSupport:
         # Read file parsing parameters from GUI.
         filename = self.w.EntryFilename.get()        
         self.print('Processing file "' + filename + '"...')
-        samplesString = self.w.EntrySamples.get()
-        if self.is_empty_or_whitespace(samplesString):
+        samples_string = self.w.EntrySamples.get()
+        if self.is_empty_or_whitespace(samples_string):
             samples = -1
         else:
             try:
-                samples = int(samplesString)
+                samples = int(samples_string)
             except ValueError:
                 self.print('ERROR: Invalid number of samples.')
                 return
@@ -204,9 +229,30 @@ class GuiSupport:
         if len(delimiter) != 1:
             self.print('ERROR: Delimiter must be a 1-character string.')
             return
-        defmode = self.radiovar.get()
+        deformation_quantity = self.deformation_quantities[self.w.TComboboxDeformation.current()]
+        stress_quantity = self.stress_quantities[self.w.TComboboxStress.current()]
         try:
-            self.xdatas[defmode], self.ydatas[defmode] = dataprocessor.process_file(filename, delimiter=delimiter, samples=samples)
+            deformation_column = int(self.w.EntryDeformation.get())
+        except ValueError:
+            self.print('ERROR: Invalid deformation column index.')
+            return
+        if deformation_column < 0:
+            self.print('ERROR: Deformation column index must be a nonnegative integer.')
+        try:
+            stress_column = int(self.w.EntryStress.get())
+        except ValueError:
+            self.print('ERROR: Invalid stress column index.')
+            return
+        if stress_column < 0:
+            self.print('ERROR: Stress column index must be a nonnegative integer.')
+        defmode = self.radiovar.get()
+
+        # Execute file processing.
+        try:
+            self.xdatas[defmode], self.ydatas[defmode] = dataprocessor.process_file(filename,
+                delimiter=delimiter, samples=samples,
+                deformation_quantity=deformation_quantity, deformation_column=deformation_column,
+                stress_quantity=stress_quantity, stress_column=stress_column)
         except FileNotFoundError:
             self.print('ERROR: File not found.')
             return
@@ -349,6 +395,12 @@ Number of function evaluations: {3}
             self.toolbarErr.update()
 
     def set_entry(self, entry, value):
+        """Sets the content of the given Entry widget.
+        ----------
+        Keyword arguments:
+        entry -- The Entry whose text should be set.
+        value -- The new text string.
+        """
         old_state = entry['state']
         entry.config(state=tk.NORMAL)
         entry.delete(0, tk.END)
@@ -356,12 +408,20 @@ Number of function evaluations: {3}
         entry.config(state=old_state)
 
     def set_text(self, text, value):
+        """Sets the content of the given Text widget.
+        ----------
+        Keyword arguments:
+        text -- The Text whose text should be set.
+        value -- The new text string.
+        """
         text.config(state=tk.NORMAL)
         text.delete(1.0, tk.END)
         text.insert(tk.END, value)
         text.config(state=tk.DISABLED)
 
     def print(self, string):
+        """Prints the given text to the logger
+        with a time stamp and a new line at end."""
         text = self.w.TextLog
         text.config(state=tk.NORMAL)
         time = datetime.now().strftime("[%H:%M:%S] ")

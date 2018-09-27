@@ -1,12 +1,16 @@
 from enum import Enum, auto
 import csv
 import numpy as np
+from math import exp
 
-class Columns(Enum):
-    STRETCH = auto()
-    PRESSURE = auto()
+from deformation import EngineeringStrain, Stretch, TrueStrain
+from stress import EngineeringStress, TrueStress
 
-def process_file(filename, delimiter=',', samples=-1, columns=[Columns.STRETCH, Columns.PRESSURE]):
+def process_file(filename, delimiter=',', samples=-1,
+                 deformation_quantity=EngineeringStrain(),
+                 deformation_column=0,
+                 stress_quantity=EngineeringStress(),
+                 stress_column=1):
     """Processes the given .csv file containing measurement data.
     ----------
     Keyword arguments:
@@ -16,8 +20,12 @@ def process_file(filename, delimiter=',', samples=-1, columns=[Columns.STRETCH, 
                If there are more points, the closest points will be thrown out,
                with respect to stretch. If all the points are to be kept,
                -1 should be passed. (default: -1)
-    columns -- A list of 'Columns' enum, specifying column order.
-               (default: [stretch, pressure])
+    deformation_quantity -- The quantity of deformation.
+                            (default: engineering strain)
+    deformation_column -- The column index of deformation data. (default: 0)
+    stress_quantity -- The quantity of stress.
+                       (default: engineering stress)
+    stress_column -- The column index of stress data. (default: 1)
     ----------
     Returns:
     A tuple of two lists (xdata, ydata) containing stretch and pressure data.
@@ -26,8 +34,15 @@ def process_file(filename, delimiter=',', samples=-1, columns=[Columns.STRETCH, 
         csvreader = csv.reader(csvfile, delimiter=delimiter)
         xdata, ydata = [], []
         for row in csvreader:
-            xdata.append(float(row[columns.index(Columns.STRETCH)]))
-            ydata.append(float(row[columns.index(Columns.PRESSURE)]))
+            deformation = float(row[deformation_column])
+            stress = float(row[stress_column])
+
+            engineering_strain = deformation_quantity.get_engineering_strain(deformation)
+            stretch = engineering_strain + 1
+            engineering_stress = stress_quantity.get_engineering_stress(stress, stretch)
+
+            xdata.append(engineering_strain)
+            ydata.append(engineering_stress)
         
         # Throw out samples which are close to each other.
         if (samples > 2):

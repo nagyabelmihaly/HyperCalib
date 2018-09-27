@@ -25,6 +25,9 @@
   <ItemGroup>
     <Compile Include=".vscode\.ropeproject\config.py" />
     <Compile Include="dataprocessor.py" />
+    <Compile Include="deformation.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="gui.py" />
     <Compile Include="gui_support.py" />
     <Compile Include="input_generator.py" />
@@ -48,6 +51,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="sandbox.py" />
+    <Compile Include="stress.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="weighted_error.py">
       <SubType>Code</SubType>
     </Compile>

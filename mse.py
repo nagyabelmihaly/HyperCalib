@@ -5,13 +5,15 @@ class MSE:
 
     def __init__(self, func, jac, hess, xdata, ydata):
         """Initializes a MSE instance whose objective function
-        calculates the mean squared error between the given
-        data points and the function.
+        calculates the square root of the mean squared error
+        between the given data points and the function.
         ----------
         Keyword arguments:
         func -- Function should have syntax func(x, *params).
         jac -- A callable calculating the gradient vector
                of the function.
+        hess -- A callable calculating the Hessian matrix
+                of the function.
         xdata -- The list of x coordinates of size (n,).
         ydata -- The list of y coordinates of size (n,).
         """
