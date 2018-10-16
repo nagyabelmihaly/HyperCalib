@@ -24,6 +24,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include=".vscode\.ropeproject\config.py" />
+    <Compile Include="cobyla.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="dataprocessor.py" />
     <Compile Include="deformation.py">
       <SubType>Code</SubType>
@@ -51,7 +54,13 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="sandbox.py" />
+    <Compile Include="slsqp.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="stress.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="trust_constr.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="weighted_error.py">

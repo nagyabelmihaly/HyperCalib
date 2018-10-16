@@ -31,11 +31,12 @@ def process_file(filename, delimiter=',', samples=-1,
     A tuple of two lists (xdata, ydata) containing stretch and pressure data.
     """
     with open(filename, 'r') as csvfile:
+        decimal = ','
         csvreader = csv.reader(csvfile, delimiter=delimiter)
         xdata, ydata = [], []
         for row in csvreader:
-            deformation = float(row[deformation_column])
-            stress = float(row[stress_column])
+            deformation = float(row[deformation_column].replace(decimal, '.'))
+            stress = float(row[stress_column].replace(decimal, '.'))
 
             engineering_strain = deformation_quantity.get_engineering_strain(deformation)
             stretch = engineering_strain + 1

@@ -21,9 +21,9 @@ class MooneyRivlin:
         """Represents the Mooney-Rivlin model to pure shear."""
         return c10 * (2 * stretch - 2 * power(stretch, -3)) + c01 * (2 * stretch - 2 * power(stretch, -3))
 
-    def constraint(self):
+    def constraint(self, x):
         """Returns the constrain of the Mooney-Rivlin model."""
-        return LinearConstraint([[1, 1]], [0], [inf])
+        return x[0] + x[1]
 
     def ut_jac(self, stretch, c10, c01):
         """Returns the gradient vector of the Mooney-Rivlin model to uniaxial tension."""

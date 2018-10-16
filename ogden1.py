@@ -21,11 +21,9 @@ class Ogden1:
         """Represents the K=1 Ogden model to pure shear."""
         return mu1 * (power(stretch, alpha1 - 1) - power(stretch, -alpha1 - 1))
 
-    def constraint(self):
+    def constraint(self, x):
         """Returns the constrain of the K=1 Ogden model."""
-        def f(x):
-            return [x[0] * x[1]]
-        return NonlinearConstraint(f, 0, inf)
+        return [x[0] * x[1]]
 
     def ut_jac(self, stretch, mu1, alpha1):
         """Returns the gradient vector of the K=1 Ogden model to uniaxial tension."""

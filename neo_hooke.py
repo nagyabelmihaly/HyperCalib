@@ -20,9 +20,9 @@ class NeoHooke:
         """Represents the Neo-Hooke model to pure shear."""
         return mu * (stretch - power(stretch, -3))
 
-    def constraint(self):
+    def constraint(self, x):
         """Returns the constrain of the Neo-Hooke model."""
-        return ()
+        return 1
 
     def ut_jac(self, stretch, mu):
         """Returns the gradient vector of the Neo-Hooke model to uniaxial tension."""

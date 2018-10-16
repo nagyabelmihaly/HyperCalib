@@ -24,11 +24,9 @@ class Ogden2:
         return mu1 * (power(stretch, alpha1 - 1) - power(stretch, -alpha1 - 1)) + \
             mu2 * (power(stretch, alpha2 - 1) - power(stretch, -alpha2 - 1))
 
-    def constraint(self):
+    def constraint(self, x):
         """Returns the constrain of the K=2 Ogden model."""
-        def f(x):
-            return [x[0] * x[2] + x[1] * x[3]]
-        return NonlinearConstraint(f, 0, inf)
+        return [x[0] * x[2] + x[1] * x[3]]
 
     def ut_jac(self, stretch, mu1, mu2, alpha1, alpha2):
         """Returns the gradient vector of the K=2 Ogden model to uniaxial tension."""

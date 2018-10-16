@@ -27,13 +27,21 @@ from ogden3 import Ogden3
 from neo_hooke import NeoHooke
 from mooney_rivlin import MooneyRivlin
 
-class GuiSupport:
+from trust_constr import TrustConstr
+from cobyla import Cobyla
+from slsqp import Slsqp
 
+class GuiSupport:
+    """Implements GUI functionality and provides a binding
+    between front-end and back-end."""
     def Init(self, top, gui):
         """Initializes the window with the widgets inside."""
         self.w = gui
         self.top_level = top
         self.root = top
+
+        # Enter full-screen mode by default.
+        top.state('zoomed')
 
         # Initialize data variables.
         self.xdatas = [None] * 3
@@ -84,6 +92,10 @@ class GuiSupport:
         self.error_function = None
         self.errors = [None] * 3
         self.weighted_error = None
+
+        # Initialize optimization methods.
+        self.methods = [TrustConstr(), Cobyla(), Slsqp()]
+        self.method = None
     
         # Initialize list of available models.
         self.w.TComboboxModel['values'] = [m.name for m in self.models]
@@ -94,6 +106,11 @@ class GuiSupport:
         self.w.TComboboxError['values'] = [e.name for e in self.error_functions]
         self.w.TComboboxError.bind('<<ComboboxSelected>>', self.ComboboxErrorSelected)
         self.w.TComboboxError.current(0)
+
+        # Initialize list of available optimization methods.
+        self.w.TComboboxMethod['values'] = [m.name for m in self.methods]
+        self.w.TComboboxMethod.bind('<<ComboboxSelected>>', self.ComboboxMethodSelected)
+        self.w.TComboboxMethod.current(0)
 
         # Initialize list of available deformation quantities.
         self.w.TComboboxDeformation['values'] = [d.name for d in self.deformation_quantities]
@@ -108,6 +125,9 @@ class GuiSupport:
 
         # Initialize error functions.
         self.ComboboxErrorSelected(None)
+
+        # Initialize optimization method.
+        self.ComboboxMethodSelected(None)
 
         # Initialize plotting utilities.
         self.titles = ['UT', 'ET', 'PS']
@@ -124,9 +144,6 @@ class GuiSupport:
         self.set_entry(self.w.EntryDelimiter, ',')
         self.set_entry(self.w.EntryDeformation, '0')
         self.set_entry(self.w.EntryStress, '1')
-        self.set_entry(self.w.EntryXtol, '1e-8')
-        self.set_entry(self.w.EntryGtol, '1e-8')
-        self.set_entry(self.w.EntryIterations, '1000')
         [self.set_entry(entry, '1') for entry in self.weight_entries]
 
     def SetTkVar(self):      
@@ -162,6 +179,53 @@ class GuiSupport:
         self.error_function = self.error_functions[current_error_function]
         self.plot()
 
+    def ComboboxMethodSelected(self, eventObj):
+        current_method = self.w.TComboboxMethod.current()
+        if self.method == self.methods[current_method]:
+            return
+        self.params = None
+        self.method = self.methods[current_method]
+        if all([xdata is None for xdata in self.xdatas]):
+            return
+        self.config_method_widgets(True)
+        self.plot()
+
+    def config_method_widgets(self, state):
+        self.config_checkbutton(self.w.CheckbuttonJac, self.calcJac,
+                                state and self.method.support_jac,
+                                self.method.default_jac)
+        self.config_checkbutton(self.w.CheckbuttonHess, self.calcHess,
+                                state and self.method.support_hess,
+                                self.method.default_hess)
+        self.config_entry(self.w.EntryXtol,
+                          state and self.method.support_xtol,
+                          self.method.default_xtol)
+        self.config_entry(self.w.EntryGtol,
+                          state and self.method.support_gtol,
+                          self.method.default_gtol)
+        self.config_entry(self.w.EntryIterations,
+                          state and self.method.support_iterations,
+                          self.method.default_iterations)
+        self.config_entry(self.w.EntryRounds,
+                          state and self.method.support_rounds,
+                          self.method.default_rounds)
+
+    def config_checkbutton(self, checkbutton, boolvar, isEnabled, default):
+        if isEnabled:
+            state = tk.NORMAL
+        else:
+            state = tk.DISABLED
+        checkbutton.config(state=state)
+        boolvar.set(default)
+
+    def config_entry(self, entry, isEnabled, default):
+        if isEnabled:
+            state = tk.NORMAL
+        else:
+            state = tk.DISABLED
+        entry.config(state=state)
+        self.set_entry(entry, default)
+
     def ButtonFitModel_Click(self):
         # Start a background thread to fit model parameters.
         thread_fitmodel = threading.Thread(target=self.try_fit_model)
@@ -193,14 +257,11 @@ class GuiSupport:
         self.w.RadiobuttonPS.config(state=state)
         self.w.TComboboxModel.config(state=combobox_state)
         self.w.TComboboxError.config(state=combobox_state)
+        self.w.TComboboxMethod.config(state=combobox_state)
         [self.weight_entries[i].config(state=state) for i in range(3) if self.xdatas[i] is not None]
         [self.fit_checkbuttons[i].config(state=state) for i in range(3) if self.xdatas[i] is not None]
         [self.plot_checkbuttons[i].config(state=state) for i in range(3) if self.xdatas[i] is not None]
-        self.w.CheckbuttonJac.config(state=state)
-        self.w.CheckbuttonHess.config(state=state)
-        self.w.EntryXtol.config(state=state)
-        self.w.EntryGtol.config(state=state)
-        self.w.EntryIterations.config(state=state)
+        self.config_method_widgets(isNormal)
 
     def try_process_data(self):
         self.set_state(False)
@@ -260,9 +321,9 @@ class GuiSupport:
             self.print('ERROR: Invalid file format.')
             return
         
-        # Add (1, 0) to datas if it does not exist.
-        if (1 not in self.xdatas[defmode]):
-            self.xdatas[defmode].append(1)
+        # Add (0, 0) to datas if it does not exist.
+        if (0 not in self.xdatas[defmode]):
+            self.xdatas[defmode].append(0)
             self.ydatas[defmode].append(0)
             self.print('Origin has been added to measurement points.')
 
@@ -274,7 +335,11 @@ class GuiSupport:
         self.print('File has been processed.')
 
     def fit_model(self):
-        self.print('Fitting ' + self.model.name + ' model...')
+        self.print("""Fitting {0} model...
+Error function: {1}
+Optimization method: {2}""".format(self.model.name,
+                                   self.error_function.name,
+                                   self.method.name))
         start_time = process_time()
         try:
             weights = [float(self.weight_entries[i].get().strip()) \
@@ -284,24 +349,42 @@ class GuiSupport:
             self.print('ERROR: Weights must be real numbers.')
             return
         try:
-            xtol = float(self.w.EntryXtol.get().strip())
+            if self.method.support_xtol:
+                xtol = float(self.w.EntryXtol.get().strip())
+            else:
+                xtol = None
         except ValueError:
             self.print('ERROR: Xtol must be a real number.')
             return
         try:
-            gtol = float(self.w.EntryGtol.get().strip())
+            if self.method.support_gtol:
+                gtol = float(self.w.EntryGtol.get().strip())
+            else:
+                gtol = None
         except ValueError:
             self.print('ERROR: Gtol must be a real number.')
             return
         try:
-            iterations = int(self.w.EntryIterations.get().strip())
-            if iterations < 1:
-                raise ValueError
+            if self.method.support_iterations:
+                iterations = int(self.w.EntryIterations.get().strip())
+                if iterations < 1:
+                    raise ValueError
+            else:
+                iterations = None
         except ValueError:
             self.print('ERROR: Number of iterations must be a positive integer.')
+        try:
+            if self.method.support_rounds:
+                rounds = int(self.w.EntryRounds.get().strip())
+                if rounds < 1:
+                    raise ValueError
+            else:
+                rounds = None
+        except ValueError:
+            self.print('ERROR: Number of rounds must be a positive integer.')
         
-        # Define (1, 0) point indices to remove origin when calculating errors.
-        originIndices = [self.xdatas[i].index(1) if self.xdatas[i] is not None else None for i in range(3)]
+        # Define (0, 0) point indices to remove origin when calculating errors.
+        originIndices = [self.xdatas[i].index(0) if self.xdatas[i] is not None else None for i in range(3)]
 
         # Initialize error instances with origins removed.
         self.errors = [self.error_function(self.functions[i], self.jacobians[i], self.hessians[i],
@@ -320,14 +403,14 @@ class GuiSupport:
         else:
             hess = BFGS()
         self.error_values = []
-        result = minimize(self.weighted_error.objfunc, [1.0] * self.model.paramcount,
-                 method='trust-constr',
-                 constraints=self.model.constraint(),
-                 jac=jac, hess=hess,
-                 callback=self.update_model,
-                 options={'xtol': xtol, 'gtol': gtol, 'maxiter': iterations, 'disp': True})
-        self.plot()
-
+        x0 = [1.0] * self.model.paramcount if self.params is None else self.params
+        result = self.method.minimize(objfunc=self.weighted_error.objfunc,
+                             x0=x0, constraint=self.model.constraint,
+                             jac=jac, hess=hess,
+                             callback=self.update_model,
+                             xtol=xtol, gtol=gtol,
+                             maxiter=iterations, rounds=rounds)
+        self.update_model(result.x, result)
         end_time = process_time()
         elapsed_time = end_time - start_time
         self.print("""Model has been fitted:
