@@ -11,15 +11,16 @@ class MooneyRivlin:
 
     def ut(self, stretch, c10, c01):
         """Represents the Mooney-Rivlin model to uniaxial tension."""
-        return c10 * (2 * stretch - 2 * power(stretch, -2)) + c01 * (2 - 2 * power(stretch, -3))
+        return 2 * (power(stretch, 2) - 1 / stretch) * (c10 + c01 / stretch)
 
     def et(self, stretch, c10, c01):
         """Represents the Mooney-Rivlin model to equibiaxial tension."""
-        return c10 * (2 * stretch - 2 * power(stretch, -5)) + c01 * (2 * power(stretch, 3) - 2 * power(stretch, -3))
+        return 2 * c10 * (power(stretch, 2) - power(stretch, -4)) + \
+               2 * c01 * (power(stretch, 4) - power(stretch, -2))
 
     def ps(self, stretch, c10, c01):
         """Represents the Mooney-Rivlin model to pure shear."""
-        return c10 * (2 * stretch - 2 * power(stretch, -3)) + c01 * (2 * stretch - 2 * power(stretch, -3))
+        return 2 * (power(stretch, 2) - power(stretch, -2)) * (c10 + c01)
 
     def constraint(self, x):
         """Returns the constrain of the Mooney-Rivlin model."""
@@ -27,27 +28,27 @@ class MooneyRivlin:
 
     def ut_jac(self, stretch, c10, c01):
         """Returns the gradient vector of the Mooney-Rivlin model to uniaxial tension."""
-        return array([2 * stretch - 2 * power(stretch, -2),
-                      2 - 2 * power(stretch, -3)])
+        return array([2 * (power(stretch, 2) - 1 / stretch),
+                      2 * (stretch - power(stretch, -2))])
 
     def et_jac(self, stretch, c10, c01):
         """Returns the gradient vector of the Mooney-Rivlin model to equibiaxial tension."""
-        return array([2 * stretch - 2 * power(stretch, -5),
-                      2 * power(stretch, 3) - 2 * power(stretch, -3)])
+        return array([2 * (power(stretch, 2) - power(stretch, -4)),
+                      2 * (power(stretch, 4) - power(stretch, -2))])
 
     def ps_jac(self, stretch, c10, c01):
         """Returns the gradient vector of the Mooney-Rivlin model to pure shear."""
-        return array([2 * stretch - 2 * power(stretch, -3),
-                      2 * stretch - 2 * power(stretch, -3)])
+        return array([2 * (power(stretch, 2) - power(stretch, -2)),
+                      2 * (power(stretch, 2) - power(stretch, -2))])
 
     def ut_hess(self, stretch, c10, c01):
         """Returns the Hessian matrix of the Mooney-Rivlin model to uniaxial tension."""
-        return array([[0.0]])
+        return array([[0.0, 0.0], [0.0, 0.0]])
 
     def et_hess(self, stretch, c10, c01):
         """Returns the Hessian matrix of the Mooney-Rivlin model to equibiaxial tension."""
-        return array([[0.0]])
+        return array([[0.0, 0.0], [0.0, 0.0]])
 
     def ps_hess(self, stretch, c10, c01):
         """Returns the Hessian matrix of the Mooney-Rivlin model to pure shear."""
-        return array([[0.0]])
+        return array([[0.0, 0.0], [0.0, 0.0]])

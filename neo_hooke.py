@@ -10,15 +10,15 @@ class NeoHooke:
 
     def ut(self, stretch, mu):
         """Represents the Neo-Hooke model to uniaxial tension."""
-        return mu * (stretch - power(stretch, -2))
+        return mu * (power(stretch, 2) - power(stretch, -1))
 
     def et(self, stretch, mu):
         """Represents the Neo-Hooke model to equibiaxial tension."""
-        return mu * (stretch - power(stretch, -5))
+        return mu * (power(stretch, 2) - power(stretch, -4))
 
     def ps(self, stretch, mu):
         """Represents the Neo-Hooke model to pure shear."""
-        return mu * (stretch - power(stretch, -3))
+        return mu * (power(stretch, 2) - power(stretch, -2))
 
     def constraint(self, x):
         """Returns the constrain of the Neo-Hooke model."""
@@ -26,15 +26,15 @@ class NeoHooke:
 
     def ut_jac(self, stretch, mu):
         """Returns the gradient vector of the Neo-Hooke model to uniaxial tension."""
-        return array([stretch - power(stretch, -2)])
+        return array([power(stretch, 2) - power(stretch, -1)])
 
     def et_jac(self, stretch, mu):
         """Returns the gradient vector of the Neo-Hooke model to equibiaxial tension."""
-        return array([stretch - power(stretch, -5)])
+        return array([power(stretch, 2) - power(stretch, -4)])
 
     def ps_jac(self, stretch, mu):
         """Returns the gradient vector of the Neo-Hooke model to pure shear."""
-        return array([stretch - power(stretch, -3)])
+        return array([power(stretch, 2) - power(stretch, -2)])
 
     def ut_hess(self, stretch, mu):
         """Returns the Hessian matrix of the Neo-Hooke model to uniaxial tension."""

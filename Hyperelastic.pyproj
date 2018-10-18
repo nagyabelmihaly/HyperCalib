@@ -31,7 +31,16 @@
     <Compile Include="deformation.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="file_dialog.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="fit_dialog.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="gui.py" />
+    <Compile Include="utilities.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="gui_support.py" />
     <Compile Include="input_generator.py" />
     <Compile Include="mooney_rivlin.py">

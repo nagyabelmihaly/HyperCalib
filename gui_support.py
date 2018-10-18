@@ -3,29 +3,28 @@ import matplotlib
 matplotlib.use("Agg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
-from matplotlib import animation
-from matplotlib import style
-style.use('ggplot')
 import tkinter as tk
 from tkinter import messagebox
-import threading
 from scipy.optimize import minimize, BFGS
 from datetime import datetime
 from time import process_time
 
-import dataprocessor
-from deformation import EngineeringStrain, Stretch, TrueStrain
-from stress import EngineeringStress, TrueStress
+from utilities import *
 
-from mse import MSE
-from msre import MSRE
-from weighted_error import WeightedError
+from file_dialog import FileDialog
+from fit_dialog import FitDialog
+
+from dataprocessor import DataProcessor
 
 from ogden1 import Ogden1
 from ogden2 import Ogden2
 from ogden3 import Ogden3
 from neo_hooke import NeoHooke
 from mooney_rivlin import MooneyRivlin
+
+from mse import MSE
+from msre import MSRE
+from weighted_error import WeightedError
 
 from trust_constr import TrustConstr
 from cobyla import Cobyla
@@ -79,10 +78,6 @@ class GuiSupport:
         self.toolbarErr = NavigationToolbar2Tk(self.canvasErr, self.w.FrameNavigationError)
         self.canvasErr._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        # Initialize deformation and stress quantities.
-        self.deformation_quantities = [EngineeringStrain(), Stretch(), TrueStrain()]
-        self.stress_quantities = [EngineeringStress(), TrueStress()]
-
         # Initialize models.
         self.models = [Ogden1(), Ogden2(), Ogden3(), NeoHooke(), MooneyRivlin()]
         self.model = None
@@ -112,14 +107,6 @@ class GuiSupport:
         self.w.TComboboxMethod.bind('<<ComboboxSelected>>', self.ComboboxMethodSelected)
         self.w.TComboboxMethod.current(0)
 
-        # Initialize list of available deformation quantities.
-        self.w.TComboboxDeformation['values'] = [d.name for d in self.deformation_quantities]
-        self.w.TComboboxDeformation.current(0)
-
-        # Initialize list of available stress quantities.
-        self.w.TComboboxStress['values'] = [s.name for s in self.stress_quantities]
-        self.w.TComboboxStress.current(0)
-
         # Initialize functions and derivatives.
         self.ComboboxModelSelected(None)
 
@@ -140,25 +127,62 @@ class GuiSupport:
         self.plot_checkbuttons = [self.w.CheckbuttonPlotUT, self.w.CheckbuttonPlotET, self.w.CheckbuttonPlotPS]
 
         # Initialize default texts.
-        self.set_entry(self.w.EntryFilename, 'data/TRELOARUT.csv')
-        self.set_entry(self.w.EntryDelimiter, ',')
-        self.set_entry(self.w.EntryDeformation, '0')
-        self.set_entry(self.w.EntryStress, '1')
-        [self.set_entry(entry, '1') for entry in self.weight_entries]
+        [set_entry(entry, '1') for entry in self.weight_entries]
+
+        # TODO: delete
+        # Load data to speedup developement process.
+        dp = DataProcessor()
+        dp.load_file('data/ut.csv')
+        dp.parse_csv()
+        dp.define_data()
+        self.xdatas[0], self.ydatas[0] = dp.stretch, dp.true_stress
+        self.isPlot[0].set(True)
+        dp.load_file('data/et.csv')
+        dp.parse_csv()
+        dp.define_data()
+        self.xdatas[1], self.ydatas[1] = dp.stretch, dp.true_stress
+        self.isPlot[1].set(True)
+        dp.load_file('data/planar.csv')
+        dp.parse_csv()
+        dp.define_data()
+        self.xdatas[2], self.ydatas[2] = dp.stretch, dp.true_stress
+        self.isPlot[2].set(True)
+        self.w.ButtonFitModel['state'] = tk.NORMAL
+        self.plot()
 
     def SetTkVar(self):      
         """Sets the TkInter variables referenced by the widgets."""
-        self.radiovar = tk.IntVar()
         self.isFit = [tk.BooleanVar() for i in range(3)]
         self.isPlot = [tk.BooleanVar() for i in range(3)]
         self.calcJac = tk.BooleanVar()
         self.calcHess = tk.BooleanVar()
 
     def ButtonProcess_Click(self):
-        # Start a background thread to process file.
-        thread_dataproc = threading.Thread(target=self.try_process_data)
-        thread_dataproc.setDaemon(True)
-        thread_dataproc.start()
+        FileDialog(self.file_loaded)
+
+    def file_loaded(self, defmode, stretch, true_stress):
+        if defmode == 'UT':
+            defmode_index = 0
+        if defmode == 'ET':
+            defmode_index = 1
+        if defmode == 'PS':
+            defmode_index = 2
+        self.xdatas[defmode_index] = stretch
+        self.ydatas[defmode_index] = true_stress
+
+        # Enable this deformation mode in GUI.
+        self.isFit[defmode_index].set(True)
+        self.isPlot[defmode_index].set(True)
+        self.plot()
+
+        # Enable model fitting.
+        self.w.ButtonFitModel['state'] = tk.NORMAL
+
+    def ButtonFitModel_Click(self):
+        FitDialog(self.xdatas, self.ydatas, self.start_fit)
+
+    def start_fit(self):
+        pass
         
     def ComboboxModelSelected(self, eventObj):
         current_model = self.w.TComboboxModel.current()
@@ -224,13 +248,7 @@ class GuiSupport:
         else:
             state = tk.DISABLED
         entry.config(state=state)
-        self.set_entry(entry, default)
-
-    def ButtonFitModel_Click(self):
-        # Start a background thread to fit model parameters.
-        thread_fitmodel = threading.Thread(target=self.try_fit_model)
-        thread_fitmodel.setDaemon(True)
-        thread_fitmodel.start()
+        set_entry(entry, default)
 
     def set_state(self, isNormal):
         """Sets the state of all the input widgets normal
@@ -263,76 +281,10 @@ class GuiSupport:
         [self.plot_checkbuttons[i].config(state=state) for i in range(3) if self.xdatas[i] is not None]
         self.config_method_widgets(isNormal)
 
-    def try_process_data(self):
-        self.set_state(False)
-        self.process_data()
-        self.set_state(True)
-
     def try_fit_model(self):
         self.set_state(False)
         self.fit_model()
         self.set_state(True)
-
-    def process_data(self):
-        # Read file parsing parameters from GUI.
-        filename = self.w.EntryFilename.get()        
-        self.print('Processing file "' + filename + '"...')
-        samples_string = self.w.EntrySamples.get()
-        if self.is_empty_or_whitespace(samples_string):
-            samples = -1
-        else:
-            try:
-                samples = int(samples_string)
-            except ValueError:
-                self.print('ERROR: Invalid number of samples.')
-                return
-        delimiter = self.w.EntryDelimiter.get().strip()
-        if len(delimiter) != 1:
-            self.print('ERROR: Delimiter must be a 1-character string.')
-            return
-        deformation_quantity = self.deformation_quantities[self.w.TComboboxDeformation.current()]
-        stress_quantity = self.stress_quantities[self.w.TComboboxStress.current()]
-        try:
-            deformation_column = int(self.w.EntryDeformation.get())
-        except ValueError:
-            self.print('ERROR: Invalid deformation column index.')
-            return
-        if deformation_column < 0:
-            self.print('ERROR: Deformation column index must be a nonnegative integer.')
-        try:
-            stress_column = int(self.w.EntryStress.get())
-        except ValueError:
-            self.print('ERROR: Invalid stress column index.')
-            return
-        if stress_column < 0:
-            self.print('ERROR: Stress column index must be a nonnegative integer.')
-        defmode = self.radiovar.get()
-
-        # Execute file processing.
-        try:
-            self.xdatas[defmode], self.ydatas[defmode] = dataprocessor.process_file(filename,
-                delimiter=delimiter, samples=samples,
-                deformation_quantity=deformation_quantity, deformation_column=deformation_column,
-                stress_quantity=stress_quantity, stress_column=stress_column)
-        except FileNotFoundError:
-            self.print('ERROR: File not found.')
-            return
-        except ValueError:
-            self.print('ERROR: Invalid file format.')
-            return
-        
-        # Add (0, 0) to datas if it does not exist.
-        if (0 not in self.xdatas[defmode]):
-            self.xdatas[defmode].append(0)
-            self.ydatas[defmode].append(0)
-            self.print('Origin has been added to measurement points.')
-
-        # Enable this deformation mode in GUI.
-        self.isFit[defmode].set(True)
-        self.isPlot[defmode].set(True)
-        self.plot()
-
-        self.print('File has been processed.')
 
     def fit_model(self):
         self.print("""Fitting {0} model...
@@ -383,8 +335,8 @@ Optimization method: {2}""".format(self.model.name,
         except ValueError:
             self.print('ERROR: Number of rounds must be a positive integer.')
         
-        # Define (0, 0) point indices to remove origin when calculating errors.
-        originIndices = [self.xdatas[i].index(0) if self.xdatas[i] is not None else None for i in range(3)]
+        # Define (1, 0) point indices to remove origin when calculating errors.
+        originIndices = [self.xdatas[i].index(1) if self.xdatas[i] is not None else None for i in range(3)]
 
         # Initialize error instances with origins removed.
         self.errors = [self.error_function(self.functions[i], self.jacobians[i], self.hessians[i],
@@ -451,19 +403,19 @@ Number of function evaluations: {3}
 
         if self.params is None:
             # Clear Text widget.
-            self.set_text(self.w.TextState, '')
+            set_text(self.w.TextState, '')
             pass
         else:
             # Write parameters and weighted error to Text widget.
-            self.set_text(self.w.TextState, '\n'.join(['{} = {:.4f}' \
+            set_text(self.w.TextState, '\n'.join(['{} = {:.4f}' \
                 .format(self.model.paramnames[i], self.params[i]) \
                 for i in range(self.model.paramcount)]) + \
                 '\n\nerror = {:.4f}'.format(self.weighted_error.objfunc(self.params)))
             pass
 
         if not is_empty:        
-            self.plt.set_xlabel('engineering stretch')
-            self.plt.set_ylabel('engineering stress')
+            self.plt.set_xlabel('stretch')
+            self.plt.set_ylabel('true stress')
             self.plt.legend()
             self.canvas.draw()
             self.toolbar.update()
@@ -475,49 +427,17 @@ Number of function evaluations: {3}
             self.pltErr.set_xlabel('iterations')
             self.pltErr.set_ylabel('error function')
             self.canvasErr.draw()
-            self.toolbarErr.update()
-
-    def set_entry(self, entry, value):
-        """Sets the content of the given Entry widget.
-        ----------
-        Keyword arguments:
-        entry -- The Entry whose text should be set.
-        value -- The new text string.
-        """
-        old_state = entry['state']
-        entry.config(state=tk.NORMAL)
-        entry.delete(0, tk.END)
-        entry.insert(tk.END, value)
-        entry.config(state=old_state)
-
-    def set_text(self, text, value):
-        """Sets the content of the given Text widget.
-        ----------
-        Keyword arguments:
-        text -- The Text whose text should be set.
-        value -- The new text string.
-        """
-        text.config(state=tk.NORMAL)
-        text.delete(1.0, tk.END)
-        text.insert(tk.END, value)
-        text.config(state=tk.DISABLED)
+            self.toolbarErr.update()    
 
     def print(self, string):
         """Prints the given text to the logger
         with a time stamp and a new line at end."""
         text = self.w.TextLog
-        text.config(state=tk.NORMAL)
         time = datetime.now().strftime("[%H:%M:%S] ")
         line_sep = '\n' + ' ' * 18
         string = line_sep.join(string.split('\n'))
-        text.insert(tk.END, time + string + '\n')
+        add_text(text, time + string + '\n')
         text.see(tk.END)
-        text.config(state=tk.DISABLED)
-
-    def is_empty_or_whitespace(self, string):
-        if not string:
-            return True    
-        return string.isspace()
 
 # gui.py bindings.
 
