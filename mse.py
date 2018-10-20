@@ -47,4 +47,5 @@ class MSE:
             result += matmul(fj, transpose(fj)) + (self.func(x, *params) - y) * self.fhess(x, *params)
         jacobian = self.jac(params)
         objf = self.objfunc(params)
-        return result / (self.n * objf) - matmul(jacobian, transpose(jacobian)) / objf
+        r = result / (self.n * objf) - matmul(jacobian, transpose(jacobian)) / objf
+        return r

@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.optimize import BFGS
 
 import tkinter as tk
 import tkinter.ttk as ttk
@@ -6,14 +7,14 @@ from tkinter import messagebox
 
 from utilities import *
 
-from ogden1 import Ogden1
-from ogden2 import Ogden2
-from ogden3 import Ogden3
+from ogden import Ogden
 from neo_hooke import NeoHooke
 from mooney_rivlin import MooneyRivlin
+from yeoh import Yeoh
 
 from mse import MSE
 from msre import MSRE
+from cod import COD
 from weighted_error import WeightedError
 
 from trust_constr import TrustConstr
@@ -31,6 +32,8 @@ class FitDialog(tk.Toplevel):
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
+        self.xdatas = xdatas
+        self.ydatas = ydatas
         self.callback = callback
 
         self.frames = {}
@@ -48,8 +51,10 @@ class FitDialog(tk.Toplevel):
         frame.tkraise()
 
     def close(self):
-        self.callback()
         self.destroy()
+        self.callback(self.model, self.error_function,
+                      self.errors, self.weights,
+                      self.weighted_error, self.method)
 
 class PageOne(tk.Frame):
     def __init__(self, parent, controller):
@@ -187,8 +192,8 @@ class PageTwo(tk.Frame):
         buttonNext.grid(row=3, column=1)
 
         # Initialize models, errors and methods.
-        self.models = [Ogden1(), Ogden2(), Ogden3(), NeoHooke(), MooneyRivlin()]
-        self.error_functions = [MSE, MSRE]
+        self.models = [Ogden(1), Ogden(2), Ogden(3), NeoHooke(), MooneyRivlin(), Yeoh()]
+        self.error_functions = [MSE, MSRE, COD]
         self.methods = [TrustConstr(), Cobyla(), Slsqp()]
 
         # Initialize list of available models.
@@ -210,12 +215,60 @@ class PageTwo(tk.Frame):
         self.controller.model = model
         self.controller.error_function = error_function
         self.controller.method = method
+        
+        # Define errors.
+        if self.controller.xdatas[0] is None:
+            errorUT = None
+        else:
+            points = zip(self.controller.xdatas[0], self.controller.ydatas[0])
+            points_without_origin = [point for point in points if point[0] != 1.0]
+            xdata = [point[0] for point in points_without_origin]
+            ydata = [point[1] for point in points_without_origin]
+            errorUT = error_function(model.ut, model.ut_jac, model.ut_hess, xdata, ydata)
+
+        if self.controller.xdatas[1] is None:
+            errorET = None
+        else:
+            points = zip(self.controller.xdatas[1], self.controller.ydatas[1])
+            points_without_origin = [point for point in points if point[0] != 1.0]
+            xdata = [point[0] for point in points_without_origin]
+            ydata = [point[1] for point in points_without_origin]
+            errorET = error_function(model.et, model.et_jac, model.et_hess, xdata, ydata)
+
+        if self.controller.xdatas[2] is None:
+            errorPS = None
+        else:
+            points = zip(self.controller.xdatas[2], self.controller.ydatas[2])
+            points_without_origin = [point for point in points if point[0] != 1.0]
+            xdata = [point[0] for point in points_without_origin]
+            ydata = [point[1] for point in points_without_origin]
+            errorPS = error_function(model.ps, model.ps_jac, model.ps_hess, xdata, ydata)
+
+        errors = [errorUT, errorET, errorPS]
+        weights = [self.controller.weightUT,
+                   self.controller.weightET,
+                   self.controller.weightPS]
+
+        weighted_error = WeightedError(errors, weights)
+
+        self.controller.errors = errors
+        self.controller.weights = weights
+        self.controller.weighted_error = weighted_error
+
+        # Set method parameters.
+        method.objfunc = weighted_error.objfunc
+        method.x0 = [1.0] * model.paramcount
+        method.constraint = model.constraint
+
+        # Navigate to page appropriate to optimization method.
         if isinstance(method, TrustConstr):
-            self.controller.show_frame("PageTrustConstr")
+            page_name = "PageTrustConstr"
         if isinstance(method, Cobyla):
-            self.controller.show_frame("PageCobyla")
+            page_name = "PageCobyla"
         if isinstance(method, Slsqp):
-            self.controller.show_frame("PageSlsqp")
+            page_name = "PageSlsqp"
+        self.controller.frames[page_name].update()
+        self.controller.show_frame(page_name)
 
 class PageTrustConstr(tk.Frame):
     def __init__(self, parent, controller):
@@ -255,14 +308,17 @@ class PageTrustConstr(tk.Frame):
         self.entryGtol.grid(row=3, column=1)
         self.entryMaxiter.grid(row=4, column=1)
         buttonPrev.grid(row=5, column=0)
-        buttonNext.grid(row=5, column=1)
+        buttonNext.grid(row=5, column=1)       
 
-        # Initialize default entry values.
-        set_entry(self.entryXtol, '1e-8')
-        set_entry(self.entryGtol, '1e-8')
-        set_entry(self.entryMaxiter, '1000')
+    def update(self):
+         # Initialize default entry values.
+        method = self.controller.method
+        set_entry(self.entryXtol, str(method.xtol))
+        set_entry(self.entryGtol, str(method.gtol))
+        set_entry(self.entryMaxiter, str(method.maxiter))
 
     def next(self):
+        # Parse parameters from GUI.
         try:
             s = self.entryXtol.get().strip()
             xtol = float(s)
@@ -284,12 +340,26 @@ class PageTrustConstr(tk.Frame):
         if maxiter < 1:
             messagebox.showerror('ERROR', 'Maximum iterations must be positive.')
             return
-        method = self.methods[self.comboboxMethod.current()]
-        self.controller.calcJac = self.calcJac.get()
-        self.controller.calcHess = self.calcHess.get()
+
+        # Set trust-constr specific parameters.
+        method = self.controller.method
+        weighted_error = self.controller.weighted_error
+        if self.calcJac.get():
+            method.calcJac = True
+            method.jac = weighted_error.jac
+        else:
+            method.calcJac = False
+            method.jac = '2-point'
+        if self.calcHess.get():
+            method.calcHess = True
+            method.hess = weighted_error.hess
+        else:
+            method.calcHess = False
+            method.hess = BFGS()
         method.xtol = xtol
         method.gtol = gtol
         method.maxiter = maxiter
+
         self.controller.close()
 
 class PageCobyla(tk.Frame):
@@ -298,15 +368,77 @@ class PageCobyla(tk.Frame):
         self.controller = controller
 
         # Initialize widgets.
+        labelTol = tk.Label(self, text='Tol:')
+        labelRhobeg = tk.Label(self, text='Rhobeg:')
+        labelMaxiter = tk.Label(self, text='Maxiter:')
+        labelCatol = tk.Label(self, text='Catol:')
+        self.entryTol = tk.Entry(self)
+        self.entryRhobeg = tk.Entry(self)
+        self.entryMaxiter = tk.Entry(self)
+        self.entryCatol = tk.Entry(self)
         buttonPrev = tk.Button(self, text="<<",
                                command=lambda: controller.show_frame("PageTwo"))
         buttonNext = tk.Button(self, text="FIT", command=self.next)
         
         # Arrange widgets in grid.
-        buttonPrev.grid(row=1, column=0)
-        buttonNext.grid(row=1, column=2)
+        labelTol.grid(row=0, column=0)
+        labelRhobeg.grid(row=1, column=0)
+        labelMaxiter.grid(row=2, column=0)
+        labelCatol.grid(row=3, column=0)
+        self.entryTol.grid(row=0, column=1)
+        self.entryRhobeg.grid(row=1, column=1)
+        self.entryMaxiter.grid(row=2, column=1)
+        self.entryCatol.grid(row=3, column=1)
+        buttonPrev.grid(row=4, column=0)
+        buttonNext.grid(row=4, column=1)
+
+    def update(self):
+        # Initialize default entry values.
+        method = self.controller.method
+        set_entry(self.entryTol, '')
+        set_entry(self.entryRhobeg, str(method.rhobeg))
+        set_entry(self.entryMaxiter, str(method.maxiter))
+        set_entry(self.entryCatol, str(method.catol))
 
     def next(self):
+        # Parse parameters from GUI.
+        try:
+            s = self.entryTol.get().strip()
+            if s == '':
+                tol = None
+            else:
+                tol = float(s)
+        except ValueError:
+            messagebox.showerror('ERROR', 'Invalid tol value "' + s + '".')
+            return
+        try:
+            s = self.entryRhobeg.get().strip()
+            rhobeg = float(s)
+        except ValueError:
+            messagebox.showerror('ERROR', 'Invalid rhobeg value "' + s + '".')
+            return
+        try:
+            s = self.entryMaxiter.get().strip()
+            maxiter = int(s)
+        except ValueError:
+            messagebox.showerror('ERROR', 'Invalid maximum iterations value "' + s + '".')
+            return
+        if maxiter < 1:
+            messagebox.showerror('ERROR', 'Maximum iterations must be positive.')
+            return
+        try:
+            s = self.entryCatol.get().strip()
+            catol = float(s)
+        except ValueError:
+            messagebox.showerror('ERROR', 'Invalid catol value "' + s + '".')
+
+        # Set COBYLA specific parameters.
+        method = self.controller.method
+        method.tol = tol
+        method.rhobeg = rhobeg
+        method.maxiter = maxiter
+        method.catol = catol
+
         self.controller.close()
 
 class PageSlsqp(tk.Frame):

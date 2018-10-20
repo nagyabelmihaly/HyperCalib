@@ -69,7 +69,7 @@ proc vTclWindow.top37 {base} {
         -menu "$top.m50" -background {#d9d9d9} -highlightbackground {#d9d9d9} \
         -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 1531x694+80+225
+    wm geometry $top 1531x694+248+228
     update
     # set in toplevel.wgt.
     global vTcl
@@ -112,65 +112,28 @@ proc vTclWindow.top37 {base} {
     .top37.tex38 configure -font TkTextFont
     .top37.tex38 insert end text
     vTcl:DefineAlias "$top.tex38" "TextLog" vTcl:WidgetProc "Toplevel1" 1
-    checkbutton $top.che39 \
-        -activebackground {#d9d9d9} -activeforeground {#000000} -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -justify left -state disabled \
-        -text {Uniaxial tension} -variable {gui_support.isFit[0]} 
-    vTcl:DefineAlias "$top.che39" "CheckbuttonFitUT" vTcl:WidgetProc "Toplevel1" 1
-    checkbutton $top.che40 \
-        -activebackground {#d9d9d9} -activeforeground {#000000} -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -justify left -state disabled \
-        -text {Equibiaxial tension} -variable {gui_support.isFit[1]} 
-    vTcl:DefineAlias "$top.che40" "CheckbuttonFitET" vTcl:WidgetProc "Toplevel1" 1
-    checkbutton $top.che42 \
-        -activebackground {#d9d9d9} -activeforeground {#000000} -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -justify left -state disabled \
-        -text {Pure shear} -variable {gui_support.isFit[2]} 
-    vTcl:DefineAlias "$top.che42" "CheckbuttonFitPS" vTcl:WidgetProc "Toplevel1" 1
-    entry $top.ent43 \
-        -background white -disabledforeground {#a3a3a3} -font TkFixedFont \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -insertbackground black \
-        -selectbackground {#c4c4c4} -selectforeground black -state disabled 
-    vTcl:DefineAlias "$top.ent43" "EntryUT" vTcl:WidgetProc "Toplevel1" 1
-    entry $top.ent45 \
-        -background white -disabledforeground {#a3a3a3} -font TkFixedFont \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -insertbackground black \
-        -selectbackground {#c4c4c4} -selectforeground black -state disabled 
-    vTcl:DefineAlias "$top.ent45" "EntryET" vTcl:WidgetProc "Toplevel1" 1
-    entry $top.ent46 \
-        -background white -disabledforeground {#a3a3a3} -font TkFixedFont \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -insertbackground black \
-        -selectbackground {#c4c4c4} -selectforeground black -state disabled 
-    vTcl:DefineAlias "$top.ent46" "EntryPS" vTcl:WidgetProc "Toplevel1" 1
     checkbutton $top.che38 \
         -activebackground {#d9d9d9} -activeforeground {#000000} -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -justify left -state disabled \
-        -text {Uniaxial tension} -variable {gui_support.isPlot[0]} 
+        -background {#d9d9d9} -command gui_support.is_fit_changed \
+        -disabledforeground {#a3a3a3} -foreground {#000000} \
+        -highlightbackground {#d9d9d9} -highlightcolor black -justify left \
+        -state disabled -text {Uniaxial tension} \
+        -variable {gui_support.isPlot[0]} 
     vTcl:DefineAlias "$top.che38" "CheckbuttonPlotUT" vTcl:WidgetProc "Toplevel1" 1
     checkbutton $top.che41 \
         -activebackground {#d9d9d9} -activeforeground {#000000} -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -justify left -state disabled \
-        -text {Equibiaxial tension} -variable {gui_support.isPlot[1]} 
+        -background {#d9d9d9} -command gui_support.is_fit_changed \
+        -disabledforeground {#a3a3a3} -foreground {#000000} \
+        -highlightbackground {#d9d9d9} -highlightcolor black -justify left \
+        -state disabled -text {Equibiaxial tension} \
+        -variable {gui_support.isPlot[1]} 
     vTcl:DefineAlias "$top.che41" "CheckbuttonPlotET" vTcl:WidgetProc "Toplevel1" 1
     checkbutton $top.che43 \
         -activebackground {#d9d9d9} -activeforeground {#000000} -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -justify left -state disabled \
-        -text {Pure shear} -variable {gui_support.isPlot[2]} 
+        -background {#d9d9d9} -command gui_support.is_fit_changed \
+        -disabledforeground {#a3a3a3} -foreground {#000000} \
+        -highlightbackground {#d9d9d9} -highlightcolor black -justify left \
+        -state disabled -text {Pure shear} -variable {gui_support.isPlot[2]} 
     vTcl:DefineAlias "$top.che43" "CheckbuttonPlotPS" vTcl:WidgetProc "Toplevel1" 1
     label $top.lab44 \
         -activebackground {#f9f9f9} -activeforeground black -anchor nw \
@@ -178,84 +141,16 @@ proc vTclWindow.top37 {base} {
         -foreground {#000000} -highlightbackground {#d9d9d9} \
         -highlightcolor black -text Plot: 
     vTcl:DefineAlias "$top.lab44" "Label4" vTcl:WidgetProc "Toplevel1" 1
-    ttk::combobox $top.tCo38 \
-        -state readonly -foreground {} -background {} -takefocus {} 
-    vTcl:DefineAlias "$top.tCo38" "TComboboxModel" vTcl:WidgetProc "Toplevel1" 1
-    label $top.lab39 \
-        -activebackground {#f9f9f9} -activeforeground black -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -text Model: 
-    vTcl:DefineAlias "$top.lab39" "Label5" vTcl:WidgetProc "Toplevel1" 1
     label $top.lab38 \
         -activebackground {#f9f9f9} -activeforeground black \
         -background {#d9d9d9} -disabledforeground {#a3a3a3} \
         -foreground {#000000} -highlightbackground {#d9d9d9} \
         -highlightcolor black -textvariable dummy 
     vTcl:DefineAlias "$top.lab38" "Label6" vTcl:WidgetProc "Toplevel1" 1
-    label $top.lab42 \
-        -activebackground {#f9f9f9} -activeforeground black -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -text {Error function:} 
-    vTcl:DefineAlias "$top.lab42" "Label7" vTcl:WidgetProc "Toplevel1" 1
-    ttk::combobox $top.tCo43 \
-        -state readonly -foreground {} -background {} -takefocus {} 
-    vTcl:DefineAlias "$top.tCo43" "TComboboxError" vTcl:WidgetProc "Toplevel1" 1
-    label $top.lab47 \
-        -activebackground {#f9f9f9} -activeforeground black -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -text gtol: 
-    vTcl:DefineAlias "$top.lab47" "Label10" vTcl:WidgetProc "Toplevel1" 1
-    label $top.lab48 \
-        -activebackground {#f9f9f9} -activeforeground black -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -text xtol: 
-    vTcl:DefineAlias "$top.lab48" "Label11" vTcl:WidgetProc "Toplevel1" 1
-    label $top.lab49 \
-        -activebackground {#f9f9f9} -activeforeground black -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -text Iterations: 
-    vTcl:DefineAlias "$top.lab49" "Label12" vTcl:WidgetProc "Toplevel1" 1
     set site_3_0 $top.m50
     menu $site_3_0 \
         -activebackground {#d8d8d8} -activeforeground {#000000} \
         -background {#d9d9d9} -font font9 -foreground {#000000} -tearoff 0 
-    checkbutton $top.che51 \
-        -activebackground {#d9d9d9} -activeforeground {#000000} -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -justify left -state disabled \
-        -text {Calculate Jacobian} -variable gui_support.calcJac 
-    vTcl:DefineAlias "$top.che51" "CheckbuttonJac" vTcl:WidgetProc "Toplevel1" 1
-    checkbutton $top.che52 \
-        -activebackground {#d9d9d9} -activeforeground {#000000} -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -justify left -state disabled \
-        -text {Calculate Hessian} -variable gui_support.calcHess 
-    vTcl:DefineAlias "$top.che52" "CheckbuttonHess" vTcl:WidgetProc "Toplevel1" 1
-    entry $top.ent53 \
-        -background white -disabledforeground {#a3a3a3} -font font10 \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -insertbackground black \
-        -selectbackground {#c4c4c4} -selectforeground black -state disabled 
-    vTcl:DefineAlias "$top.ent53" "EntryIterations" vTcl:WidgetProc "Toplevel1" 1
-    entry $top.ent54 \
-        -background white -disabledforeground {#a3a3a3} -font font10 \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -insertbackground black \
-        -selectbackground {#c4c4c4} -selectforeground black -state disabled 
-    vTcl:DefineAlias "$top.ent54" "EntryXtol" vTcl:WidgetProc "Toplevel1" 1
-    entry $top.ent55 \
-        -background white -disabledforeground {#a3a3a3} -font font10 \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -insertbackground black \
-        -selectbackground {#c4c4c4} -selectforeground black -state disabled 
-    vTcl:DefineAlias "$top.ent55" "EntryGtol" vTcl:WidgetProc "Toplevel1" 1
     text $top.tex39 \
         -background white -font font9 -foreground black -height 270 \
         -highlightbackground {#d9d9d9} -highlightcolor black \
@@ -272,27 +167,6 @@ proc vTclWindow.top37 {base} {
         -borderwidth 2 -relief groove -background {#d9d9d9} -height 35 \
         -highlightbackground {#d9d9d9} -highlightcolor black -width 615 
     vTcl:DefineAlias "$top.fra41" "FrameNavigationError" vTcl:WidgetProc "Toplevel1" 1
-    label $top.lab50 \
-        -activebackground {#f9f9f9} -activeforeground black -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -text Method: 
-    vTcl:DefineAlias "$top.lab50" "Label13" vTcl:WidgetProc "Toplevel1" 1
-    ttk::combobox $top.tCo51 \
-        -state readonly -foreground {} -background {} -takefocus {} 
-    vTcl:DefineAlias "$top.tCo51" "TComboboxMethod" vTcl:WidgetProc "Toplevel1" 1
-    label $top.lab51 \
-        -activebackground {#f9f9f9} -activeforeground black -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -text Rounds: 
-    vTcl:DefineAlias "$top.lab51" "Label14" vTcl:WidgetProc "Toplevel1" 1
-    entry $top.ent52 \
-        -background white -disabledforeground {#a3a3a3} -font font10 \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -insertbackground black \
-        -selectbackground {#c4c4c4} -selectforeground black -state disabled 
-    vTcl:DefineAlias "$top.ent52" "EntryRounds" vTcl:WidgetProc "Toplevel1" 1
     ###################
     # SETTING GEOMETRY
     ###################
@@ -306,26 +180,11 @@ proc vTclWindow.top37 {base} {
         -in $top -x 510 -y 640 -width 500 -relwidth 0 -height 40 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.but45 \
-        -in $top -x 20 -y 650 -width 470 -relwidth 0 -height 26 -relheight 0 \
+        -in $top -x 20 -y 60 -width 470 -relwidth 0 -height 26 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.tex38 \
         -in $top -x 1020 -y 10 -width 500 -relwidth 0 -height 330 \
         -relheight 0 -anchor nw -bordermode ignore 
-    place $top.che39 \
-        -in $top -x 20 -y 360 -anchor nw -bordermode ignore 
-    place $top.che40 \
-        -in $top -x 20 -y 390 -anchor nw -bordermode ignore 
-    place $top.che42 \
-        -in $top -x 20 -y 420 -anchor nw -bordermode ignore 
-    place $top.ent43 \
-        -in $top -x 190 -y 360 -width 294 -relwidth 0 -height 24 -relheight 0 \
-        -anchor nw -bordermode ignore 
-    place $top.ent45 \
-        -in $top -x 190 -y 390 -width 294 -relwidth 0 -height 24 -relheight 0 \
-        -anchor nw -bordermode ignore 
-    place $top.ent46 \
-        -in $top -x 190 -y 420 -width 294 -relwidth 0 -height 24 -relheight 0 \
-        -anchor nw -bordermode ignore 
     place $top.che38 \
         -in $top -x 570 -y 310 -anchor nw -bordermode ignore 
     place $top.che41 \
@@ -334,37 +193,8 @@ proc vTclWindow.top37 {base} {
         -in $top -x 900 -y 310 -anchor nw -bordermode ignore 
     place $top.lab44 \
         -in $top -x 520 -y 310 -anchor nw -bordermode ignore 
-    place $top.tCo38 \
-        -in $top -x 130 -y 250 -width 357 -relwidth 0 -height 26 -relheight 0 \
-        -anchor nw -bordermode ignore 
-    place $top.lab39 \
-        -in $top -x 20 -y 250 -anchor nw -bordermode ignore 
     place $top.lab38 \
         -in $top -x 30 -y 490 -anchor nw -bordermode ignore 
-    place $top.lab42 \
-        -in $top -x 20 -y 280 -anchor nw -bordermode ignore 
-    place $top.tCo43 \
-        -in $top -x 130 -y 280 -width 357 -relwidth 0 -height 26 -relheight 0 \
-        -anchor nw -bordermode ignore 
-    place $top.lab47 \
-        -in $top -x 30 -y 540 -anchor nw -bordermode ignore 
-    place $top.lab48 \
-        -in $top -x 30 -y 510 -anchor nw -bordermode ignore 
-    place $top.lab49 \
-        -in $top -x 30 -y 570 -anchor nw -bordermode ignore 
-    place $top.che51 \
-        -in $top -x 20 -y 470 -anchor nw -bordermode ignore 
-    place $top.che52 \
-        -in $top -x 230 -y 470 -anchor nw -bordermode ignore 
-    place $top.ent53 \
-        -in $top -x 190 -y 570 -width 294 -relwidth 0 -height 24 -relheight 0 \
-        -anchor nw -bordermode ignore 
-    place $top.ent54 \
-        -in $top -x 190 -y 510 -width 294 -relwidth 0 -height 24 -relheight 0 \
-        -anchor nw -bordermode ignore 
-    place $top.ent55 \
-        -in $top -x 190 -y 540 -width 294 -relwidth 0 -height 24 -relheight 0 \
-        -anchor nw -bordermode ignore 
     place $top.tex39 \
         -in $top -x 510 -y 10 -width 500 -relwidth 0 -height 270 -relheight 0 \
         -anchor nw -bordermode ignore 
@@ -374,16 +204,6 @@ proc vTclWindow.top37 {base} {
     place $top.fra41 \
         -in $top -x 1020 -y 640 -width 500 -relwidth 0 -height 40 \
         -relheight 0 -anchor nw -bordermode ignore 
-    place $top.lab50 \
-        -in $top -x 20 -y 310 -anchor nw -bordermode ignore 
-    place $top.tCo51 \
-        -in $top -x 130 -y 310 -width 357 -relwidth 0 -height 26 -relheight 0 \
-        -anchor nw -bordermode ignore 
-    place $top.lab51 \
-        -in $top -x 30 -y 600 -anchor nw -bordermode ignore 
-    place $top.ent52 \
-        -in $top -x 190 -y 600 -width 294 -relwidth 0 -height 24 -relheight 0 \
-        -anchor nw -bordermode ignore 
 
     vTcl:FireEvent $base <<Ready>>
 }

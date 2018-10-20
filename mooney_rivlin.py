@@ -1,4 +1,4 @@
-from numpy import power, inf, array
+from numpy import power, inf, array, zeros
 from scipy.optimize import LinearConstraint
 
 class MooneyRivlin:
@@ -43,12 +43,12 @@ class MooneyRivlin:
 
     def ut_hess(self, stretch, c10, c01):
         """Returns the Hessian matrix of the Mooney-Rivlin model to uniaxial tension."""
-        return array([[0.0, 0.0], [0.0, 0.0]])
+        return zeros((2, 2))
 
     def et_hess(self, stretch, c10, c01):
         """Returns the Hessian matrix of the Mooney-Rivlin model to equibiaxial tension."""
-        return array([[0.0, 0.0], [0.0, 0.0]])
+        return zeros((2, 2))
 
     def ps_hess(self, stretch, c10, c01):
         """Returns the Hessian matrix of the Mooney-Rivlin model to pure shear."""
-        return array([[0.0, 0.0], [0.0, 0.0]])
+        return zeros((2, 2))

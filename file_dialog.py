@@ -279,9 +279,9 @@ class PageFive(tk.Frame):
         xdatas = self.controller.processor.stretch_limited
         ydatas = self.controller.processor.true_stress_limited
 
-        # Add (0, 0) to datas if it does not exist.
-        if (0 not in xdatas):
-            xdatas.append(0)
-            ydatas.append(0)
+        # Add (1, 0) to datas if it does not exist.
+        if (1.0 not in xdatas):
+            xdatas.append(1.0)
+            ydatas.append(0.0)
 
         self.controller.close()

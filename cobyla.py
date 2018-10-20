@@ -2,35 +2,36 @@ from scipy.optimize import minimize
 
 class Cobyla:
     name = "COBYLA"
-    support_jac = False
-    support_hess = False
-    support_xtol = True
-    support_gtol = False
-    support_iterations = True
-    support_rounds = True
 
-    default_jac = False
-    default_hess = False
-    default_xtol = '1e-8'
-    default_gtol = ''
-    default_iterations = '1000'
-    default_rounds = '10'
+    def __init__(self):
+        self.tol = None
+        self.rhobeg = 1.0
+        self.maxiter = 1000
+        self.catol = 0.0002
 
-    def get_constraint(self, fun):
-        return {'type': 'ineq', 'fun': fun}
+    def print_params(self):
+        return """Tol: {0}
+Rhobeg: {1}
+Maximum iterations: {2}
+Catol: {3}""".format(self.tol, self.rhobeg, self.maxiter, self.catol)
 
-    def minimize(self, objfunc, x0, constraint, jac, hess, callback, xtol, gtol, maxiter, rounds):
-        nfev = 0
-        for i in range(rounds):
-            result = minimize(objfunc, x0,
-                     method='COBYLA',
-                     constraints=self.get_constraint(constraint),
-                     tol=xtol,
-                     options={'maxiter': maxiter, 'disp': True})
-            nfev += result.nfev
-            result.niter = 0
-            x0 = result.x
-            callback(x0, result)
-        result.nfev = nfev
-        result.niter = nfev
+
+    def get_constraint(self):
+        return {'type': 'ineq', 'fun': self.constraint}
+
+    def minimize(self, callback):
+        result = minimize(self.objfunc, self.x0,
+                        method='COBYLA',
+                        constraints=self.get_constraint(),
+                        tol=self.tol,
+                        callback=callback,
+                        options={'rhobeg': self.rhobeg,
+                                 'maxiter': self.maxiter,
+                                 'disp': True,
+                                 'catol': self.catol})
+        result.niter = 1
+        result.print = """Number of function evaluations: {0}
+{1} {2}""".format(result.nfev,
+                 '' if result.success else 'Optimization failed.',
+                 result.message)
         return result

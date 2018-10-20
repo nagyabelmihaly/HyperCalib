@@ -8,6 +8,7 @@ from tkinter import messagebox
 from scipy.optimize import minimize, BFGS
 from datetime import datetime
 from time import process_time
+import threading
 
 from utilities import *
 
@@ -15,20 +16,8 @@ from file_dialog import FileDialog
 from fit_dialog import FitDialog
 
 from dataprocessor import DataProcessor
-
-from ogden1 import Ogden1
-from ogden2 import Ogden2
-from ogden3 import Ogden3
-from neo_hooke import NeoHooke
-from mooney_rivlin import MooneyRivlin
-
-from mse import MSE
-from msre import MSRE
-from weighted_error import WeightedError
-
-from trust_constr import TrustConstr
-from cobyla import Cobyla
-from slsqp import Slsqp
+from deformation import EngineeringStrain, Stretch, TrueStrain
+from stress import EngineeringStress, TrueStress
 
 class GuiSupport:
     """Implements GUI functionality and provides a binding
@@ -51,6 +40,7 @@ class GuiSupport:
 
         # Initialize error values variable.
         self.error_values = None
+        self.errors = [None] * 3
 
         # Initialize a Figure for plotting the model.
         fig = Figure(figsize=(5, 2), dpi=100)
@@ -78,84 +68,53 @@ class GuiSupport:
         self.toolbarErr = NavigationToolbar2Tk(self.canvasErr, self.w.FrameNavigationError)
         self.canvasErr._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        # Initialize models.
-        self.models = [Ogden1(), Ogden2(), Ogden3(), NeoHooke(), MooneyRivlin()]
-        self.model = None
-
-        # Initialize errors.
-        self.error_functions = [MSE, MSRE]
-        self.error_function = None
-        self.errors = [None] * 3
-        self.weighted_error = None
-
-        # Initialize optimization methods.
-        self.methods = [TrustConstr(), Cobyla(), Slsqp()]
-        self.method = None
-    
-        # Initialize list of available models.
-        self.w.TComboboxModel['values'] = [m.name for m in self.models]
-        self.w.TComboboxModel.bind('<<ComboboxSelected>>', self.ComboboxModelSelected)
-        self.w.TComboboxModel.current(0)
-
-        # Initialize list of available error functions.
-        self.w.TComboboxError['values'] = [e.name for e in self.error_functions]
-        self.w.TComboboxError.bind('<<ComboboxSelected>>', self.ComboboxErrorSelected)
-        self.w.TComboboxError.current(0)
-
-        # Initialize list of available optimization methods.
-        self.w.TComboboxMethod['values'] = [m.name for m in self.methods]
-        self.w.TComboboxMethod.bind('<<ComboboxSelected>>', self.ComboboxMethodSelected)
-        self.w.TComboboxMethod.current(0)
-
-        # Initialize functions and derivatives.
-        self.ComboboxModelSelected(None)
-
-        # Initialize error functions.
-        self.ComboboxErrorSelected(None)
-
-        # Initialize optimization method.
-        self.ComboboxMethodSelected(None)
-
         # Initialize plotting utilities.
         self.titles = ['UT', 'ET', 'PS']
         self.data_colors = ['b', 'r', 'g']
         self.fit_colors = ['#8080ff', '#ff8080', '#80ff80']
 
-        # Initialize widget references. 
-        self.fit_checkbuttons = [self.w.CheckbuttonFitUT, self.w.CheckbuttonFitET, self.w.CheckbuttonFitPS]
-        self.weight_entries = [self.w.EntryUT, self.w.EntryET, self.w.EntryPS]
+        # Initialize widget references.
         self.plot_checkbuttons = [self.w.CheckbuttonPlotUT, self.w.CheckbuttonPlotET, self.w.CheckbuttonPlotPS]
-
-        # Initialize default texts.
-        [set_entry(entry, '1') for entry in self.weight_entries]
 
         # TODO: delete
         # Load data to speedup developement process.
+        #dp = DataProcessor()
+        #dp.load_file('data/ut.csv')
+        #dp.parse_csv()
+        #dp.define_data(EngineeringStrain(), 1, EngineeringStress(), 2)
+        #self.xdatas[0], self.ydatas[0] = dp.stretch, dp.true_stress
+        #self.isPlot[0].set(True)
+        #dp.load_file('data/et.csv')
+        #dp.parse_csv()
+        #dp.define_data(EngineeringStrain(), 1, EngineeringStress(), 2)
+        #self.xdatas[1], self.ydatas[1] = dp.stretch, dp.true_stress
+        #self.isPlot[1].set(True)
+        #dp.load_file('data/planar.csv')
+        #dp.parse_csv()
+        #dp.define_data(EngineeringStrain(), 1, EngineeringStress(), 2)
+        #self.xdatas[2], self.ydatas[2] = dp.stretch, dp.true_stress
+        #self.isPlot[2].set(True)
+        #self.w.ButtonFitModel['state'] = tk.NORMAL
+        #for defmode_index in range(3):
+        #    self.plot_checkbuttons[defmode_index]['state'] = tk.NORMAL
+        #self.plot()
+
         dp = DataProcessor()
-        dp.load_file('data/ut.csv')
-        dp.parse_csv()
-        dp.define_data()
+        dp.load_file('data/TRELOARUT.csv')
+        dp.parse_csv(',', '.')
+        dp.define_data(Stretch(), 1, EngineeringStress(), 2)
         self.xdatas[0], self.ydatas[0] = dp.stretch, dp.true_stress
         self.isPlot[0].set(True)
-        dp.load_file('data/et.csv')
-        dp.parse_csv()
-        dp.define_data()
-        self.xdatas[1], self.ydatas[1] = dp.stretch, dp.true_stress
-        self.isPlot[1].set(True)
-        dp.load_file('data/planar.csv')
-        dp.parse_csv()
-        dp.define_data()
-        self.xdatas[2], self.ydatas[2] = dp.stretch, dp.true_stress
-        self.isPlot[2].set(True)
         self.w.ButtonFitModel['state'] = tk.NORMAL
+        self.plot_checkbuttons[0]['state'] = tk.NORMAL
         self.plot()
 
     def SetTkVar(self):      
         """Sets the TkInter variables referenced by the widgets."""
-        self.isFit = [tk.BooleanVar() for i in range(3)]
         self.isPlot = [tk.BooleanVar() for i in range(3)]
-        self.calcJac = tk.BooleanVar()
-        self.calcHess = tk.BooleanVar()
+
+    def is_fit_changed(self):
+        self.plot()
 
     def ButtonProcess_Click(self):
         FileDialog(self.file_loaded)
@@ -170,8 +129,8 @@ class GuiSupport:
         self.xdatas[defmode_index] = stretch
         self.ydatas[defmode_index] = true_stress
 
-        # Enable this deformation mode in GUI.
-        self.isFit[defmode_index].set(True)
+        # Enable this deformation mode in GUI.f
+        self.plot_checkbuttons[defmode_index]['state'] = tk.NORMAL
         self.isPlot[defmode_index].set(True)
         self.plot()
 
@@ -181,196 +140,59 @@ class GuiSupport:
     def ButtonFitModel_Click(self):
         FitDialog(self.xdatas, self.ydatas, self.start_fit)
 
-    def start_fit(self):
-        pass
+    def name(self, i):
+        if i == 0:
+            return 'UT'
+        if i == 1:
+            return 'ET'
+        if i == 2:
+            return 'PS'
+
+    def start_fit(self, model, error_function, errors, weights, weighted_error, method):
+        self.model = model
+        self.error_function = error_function
+        self.errors = errors
+        self.weights = weights
+        self.weighted_error = weighted_error
+        self.method = method
+
+        self.functions = [model.ut, model.et, model.ps]
+
+        defcount = sum(weights[i] > 0 for i in range(3))
+        if defcount == 1:
+            defindex = weights.index(next(w for w in weights if w != 0))
+            deformation = self.name(defindex)
+        else:
+            deformation = '; '.join([str(weights[i]) + 'x' + self.name(i) for i in range(3) if weights[i] != 0.0])
+        self.print("""Starting curve fitting...
+Deformation type: {0}
+Hyperelastic model: {1}
+Error function: {2}
+Optimization method: {3}
+{4}""".format(deformation,
+              model.name,
+              error_function.name,
+              method.name,
+              method.print_params()))
         
-    def ComboboxModelSelected(self, eventObj):
-        current_model = self.w.TComboboxModel.current()
-        if self.model == self.models[current_model]:
-            return
-        self.params = None
-        self.model = self.models[current_model]
-        self.functions = [self.model.ut, self.model.et, self.model.ps]
-        self.jacobians = [self.model.ut_jac, self.model.et_jac, self.model.ps_jac]
-        self.hessians = [self.model.ut_hess, self.model.et_hess, self.model.ps_hess]
-        self.plot()
-
-    def ComboboxErrorSelected(self, eventObj):
-        current_error_function = self.w.TComboboxError.current()
-        if self.error_function == self.error_functions[current_error_function]:
-            return
-        self.params = None
-        self.error_function = self.error_functions[current_error_function]
-        self.plot()
-
-    def ComboboxMethodSelected(self, eventObj):
-        current_method = self.w.TComboboxMethod.current()
-        if self.method == self.methods[current_method]:
-            return
-        self.params = None
-        self.method = self.methods[current_method]
-        if all([xdata is None for xdata in self.xdatas]):
-            return
-        self.config_method_widgets(True)
-        self.plot()
-
-    def config_method_widgets(self, state):
-        self.config_checkbutton(self.w.CheckbuttonJac, self.calcJac,
-                                state and self.method.support_jac,
-                                self.method.default_jac)
-        self.config_checkbutton(self.w.CheckbuttonHess, self.calcHess,
-                                state and self.method.support_hess,
-                                self.method.default_hess)
-        self.config_entry(self.w.EntryXtol,
-                          state and self.method.support_xtol,
-                          self.method.default_xtol)
-        self.config_entry(self.w.EntryGtol,
-                          state and self.method.support_gtol,
-                          self.method.default_gtol)
-        self.config_entry(self.w.EntryIterations,
-                          state and self.method.support_iterations,
-                          self.method.default_iterations)
-        self.config_entry(self.w.EntryRounds,
-                          state and self.method.support_rounds,
-                          self.method.default_rounds)
-
-    def config_checkbutton(self, checkbutton, boolvar, isEnabled, default):
-        if isEnabled:
-            state = tk.NORMAL
-        else:
-            state = tk.DISABLED
-        checkbutton.config(state=state)
-        boolvar.set(default)
-
-    def config_entry(self, entry, isEnabled, default):
-        if isEnabled:
-            state = tk.NORMAL
-        else:
-            state = tk.DISABLED
-        entry.config(state=state)
-        set_entry(entry, default)
-
-    def set_state(self, isNormal):
-        """Sets the state of all the input widgets normal
-        or disabled/readonly according to the given parameter.
-        ----------
-        Keyword arguments:
-        isNormal -- True, if widgets should be normal (active);
-                    otherwise, false.
-        """
-        if isNormal:
-            state = tk.NORMAL
-            combobox_state = 'readonly'
-        else:
-            state = tk.DISABLED
-            combobox_state = tk.DISABLED
-            
-        self.w.ButtonFitModel.config(state=state)
-        self.w.ButtonProcess.config(state=state)
-        self.w.EntryFilename.config(state=state)
-        self.w.EntrySamples.config(state=state)
-        self.w.EntryDelimiter.config(state=state)
-        self.w.RadiobuttonUT.config(state=state)
-        self.w.RadiobuttonET.config(state=state)
-        self.w.RadiobuttonPS.config(state=state)
-        self.w.TComboboxModel.config(state=combobox_state)
-        self.w.TComboboxError.config(state=combobox_state)
-        self.w.TComboboxMethod.config(state=combobox_state)
-        [self.weight_entries[i].config(state=state) for i in range(3) if self.xdatas[i] is not None]
-        [self.fit_checkbuttons[i].config(state=state) for i in range(3) if self.xdatas[i] is not None]
-        [self.plot_checkbuttons[i].config(state=state) for i in range(3) if self.xdatas[i] is not None]
-        self.config_method_widgets(isNormal)
-
-    def try_fit_model(self):
-        self.set_state(False)
-        self.fit_model()
-        self.set_state(True)
+        thread = threading.Thread(target=self.fit_model)
+        thread.setDaemon(True)
+        thread.start()
 
     def fit_model(self):
-        self.print("""Fitting {0} model...
-Error function: {1}
-Optimization method: {2}""".format(self.model.name,
-                                   self.error_function.name,
-                                   self.method.name))
         start_time = process_time()
-        try:
-            weights = [float(self.weight_entries[i].get().strip()) \
-                if self.xdatas[i] is not None and self.isFit[i].get() \
-                else 0.0 for i in range(3)]
-        except ValueError:
-            self.print('ERROR: Weights must be real numbers.')
-            return
-        try:
-            if self.method.support_xtol:
-                xtol = float(self.w.EntryXtol.get().strip())
-            else:
-                xtol = None
-        except ValueError:
-            self.print('ERROR: Xtol must be a real number.')
-            return
-        try:
-            if self.method.support_gtol:
-                gtol = float(self.w.EntryGtol.get().strip())
-            else:
-                gtol = None
-        except ValueError:
-            self.print('ERROR: Gtol must be a real number.')
-            return
-        try:
-            if self.method.support_iterations:
-                iterations = int(self.w.EntryIterations.get().strip())
-                if iterations < 1:
-                    raise ValueError
-            else:
-                iterations = None
-        except ValueError:
-            self.print('ERROR: Number of iterations must be a positive integer.')
-        try:
-            if self.method.support_rounds:
-                rounds = int(self.w.EntryRounds.get().strip())
-                if rounds < 1:
-                    raise ValueError
-            else:
-                rounds = None
-        except ValueError:
-            self.print('ERROR: Number of rounds must be a positive integer.')
-        
-        # Define (1, 0) point indices to remove origin when calculating errors.
-        originIndices = [self.xdatas[i].index(1) if self.xdatas[i] is not None else None for i in range(3)]
 
-        # Initialize error instances with origins removed.
-        self.errors = [self.error_function(self.functions[i], self.jacobians[i], self.hessians[i],
-                           self.xdatas[i][:originIndices[i]] + self.xdatas[i][originIndices[i] + 1:],
-                           self.ydatas[i][:originIndices[i]] + self.ydatas[i][originIndices[i] + 1:]) \
-            if self.xdatas[i] is not None else None for i in range(3)]
-        self.weighted_error = WeightedError(self.errors, weights)
-
-        # Define Jacobian and Hessian calculation method based on GUI input.
-        if self.calcJac.get():
-            jac = self.weighted_error.jac
-        else:
-            jac = '2-point'
-        if self.calcHess.get():
-            hess = self.weighted_error.hess
-        else:
-            hess = BFGS()
         self.error_values = []
-        x0 = [1.0] * self.model.paramcount if self.params is None else self.params
-        result = self.method.minimize(objfunc=self.weighted_error.objfunc,
-                             x0=x0, constraint=self.model.constraint,
-                             jac=jac, hess=hess,
-                             callback=self.update_model,
-                             xtol=xtol, gtol=gtol,
-                             maxiter=iterations, rounds=rounds)
+        result = self.method.minimize(self.update_model)
+
         self.update_model(result.x, result)
+        self.plot()
         end_time = process_time()
         elapsed_time = end_time - start_time
-        self.print("""Model has been fitted:
-Error: {0:.4f}
-Elapsed time: {1:.4f} ms
-Number of iterations: {2}
-Number of function evaluations: {3}
-{4}""".format(result.fun, elapsed_time, result.niter, result.nfev, result.message))
+        self.print("""Model has been fitted.
+Error: {0:.4g}
+Elapsed time: {1:.4f} s
+{2}""".format(result.fun, elapsed_time, result.print))
 
     def update_model(self, xk, state):
         self.params = xk
@@ -390,7 +212,7 @@ Number of function evaluations: {3}
             ydata = self.ydatas[defmode]
             label = self.titles[defmode]
             if self.errors[defmode] is not None and self.params is not None:
-                label += ' - error={:.4f}'.format(self.errors[defmode].objfunc(self.params))
+                label += ' - error={:.4g}'.format(self.errors[defmode].objfunc(self.params))
             self.plt.plot(xdata, ydata, marker='o', linestyle='', color=self.data_colors[defmode], label=label)
             is_empty = False
         
@@ -407,7 +229,7 @@ Number of function evaluations: {3}
             pass
         else:
             # Write parameters and weighted error to Text widget.
-            set_text(self.w.TextState, '\n'.join(['{} = {:.4f}' \
+            set_text(self.w.TextState, '\n'.join(['{} = {:.4g}' \
                 .format(self.model.paramnames[i], self.params[i]) \
                 for i in range(self.model.paramcount)]) + \
                 '\n\nerror = {:.4f}'.format(self.weighted_error.objfunc(self.params)))
@@ -440,7 +262,6 @@ Number of function evaluations: {3}
         text.see(tk.END)
 
 # gui.py bindings.
-
 global gui_support
 gui_support = GuiSupport()
 

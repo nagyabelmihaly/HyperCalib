@@ -8,6 +8,10 @@ class NeoHooke:
         self.paramnames = ["mu"]
         self.paramcount = len(self.paramnames)
 
+    def constraint(self, x):
+        """Returns the constrain of the Neo-Hooke model."""
+        return 1
+
     def ut(self, stretch, mu):
         """Represents the Neo-Hooke model to uniaxial tension."""
         return mu * (power(stretch, 2) - power(stretch, -1))
@@ -19,10 +23,6 @@ class NeoHooke:
     def ps(self, stretch, mu):
         """Represents the Neo-Hooke model to pure shear."""
         return mu * (power(stretch, 2) - power(stretch, -2))
-
-    def constraint(self, x):
-        """Returns the constrain of the Neo-Hooke model."""
-        return 1
 
     def ut_jac(self, stretch, mu):
         """Returns the gradient vector of the Neo-Hooke model to uniaxial tension."""

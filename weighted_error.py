@@ -30,6 +30,7 @@ class WeightedError:
     def hess(self, params):
         """Calculates the Hessian matrix of the objective function
         when the parameters are applied."""
-        return array([[sum(error.hess(params)[i, j] * weight \
+        r = array([[sum(error.hess(params)[i, j] * weight \
             for error, weight in self.factors) \
             for i in range(len(params))] for j in range(len(params))])
+        return r

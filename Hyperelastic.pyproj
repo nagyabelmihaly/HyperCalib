@@ -27,6 +27,9 @@
     <Compile Include="cobyla.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="cod.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="dataprocessor.py" />
     <Compile Include="deformation.py">
       <SubType>Code</SubType>
@@ -38,6 +41,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="gui.py" />
+    <Compile Include="ogden.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="utilities.py">
       <SubType>Code</SubType>
     </Compile>
@@ -55,13 +61,6 @@
     <Compile Include="neo_hooke.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ogden1.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="ogden2.py" />
-    <Compile Include="ogden3.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="sandbox.py" />
     <Compile Include="slsqp.py">
       <SubType>Code</SubType>
@@ -73,6 +72,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="weighted_error.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="yeoh.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
