@@ -24,9 +24,9 @@ class DataProcessor:
         self.min_column_count = min([len(row) for row in self.raw])
 
     def define_data(self,
-                 deformation_quantity=Stretch(),
+                 deformation_quantity=Stretch,
                  deformation_column=1,
-                 stress_quantity=TrueStress(),
+                 stress_quantity=TrueStress,
                  stress_column=2):
         if deformation_column < 1:
             raise ValueError('Deformation column index has to be positive.')
@@ -58,8 +58,8 @@ class DataProcessor:
                     '" is not a valid number in row ' + \
                     str(rowindex) + '.')
                 return
-            stretch = deformation_quantity.get_stretch(deformation)
-            true_stress = stress_quantity.get_true_stress(stress, stretch)
+            stretch = deformation_quantity.to_stretch(deformation)
+            true_stress = stress_quantity.to_true_stress(stress, stretch)
             self.stretch.append(stretch)
             self.true_stress.append(true_stress)
             combined = [pair for pair in zip(self.stretch, self.true_stress)]

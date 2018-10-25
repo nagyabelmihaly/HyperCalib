@@ -195,8 +195,8 @@ class PageFour(tk.Frame):
         self.grid_rowconfigure(2, weight=1)
 
         # Initialize deformation and stress quantities.
-        self.deformation_quantities = [Stretch(), EngineeringStrain(), TrueStrain()]
-        self.stress_quantities = [TrueStress(), EngineeringStress()]
+        self.deformation_quantities = [Stretch, EngineeringStrain, TrueStrain]
+        self.stress_quantities = [TrueStress, EngineeringStress]
 
         # Initialize list of available deformation quantities.
         self.comboboxDeformation['values'] = [d.name for d in self.deformation_quantities]

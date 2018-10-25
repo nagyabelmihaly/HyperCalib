@@ -47,6 +47,9 @@
     <Compile Include="ogden.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="plot_settings_dialog.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="utilities.py">
       <SubType>Code</SubType>
     </Compile>

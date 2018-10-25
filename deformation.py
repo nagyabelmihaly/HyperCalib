@@ -3,41 +3,38 @@ from numpy import exp, log
 class EngineeringStrain:
     """Engineering strain is the ratio of length change
     and original length."""
-    def __init__(self):
-        self.name = 'Engineering strain'
+    name = 'Engineering strain'
 
-    def get_engineering_strain(self, engineering_strain):
-        """Converts the given value to engineering strain."""
-        return engineering_strain
+    def from_stretch(stretch):
+        """Converts the given stretch to engineering strain."""
+        return stretch - 1
 
-    def get_stretch(self, engineering_strain):
-        """Converts the given value to stretch."""
+    def to_stretch(engineering_strain):
+        """Converts the given engineering strain to stretch."""
         return engineering_strain + 1
 
 class Stretch:
     """Stretch is the ratio of deformed length
     and original length."""
-    def __init__(self):
-        self.name = 'Stretch'
+    name = 'Stretch'
 
-    def get_engineering_strain(self, stretch):
-        """Converts the given value to engineering strain."""
-        return stretch - 1
+    def from_stretch(stretch):
+        """Converts the given stretch to stretch."""
+        return stretch
 
-    def get_stretch(self, stretch):
-        """Converts the given value to stretch."""
+    def to_stretch(stretch):
+        """Converts the given stretch to stretch."""
         return stretch
 
 class TrueStrain:
     """True strain is the natural logarithm of the ratio
     of deformed length and original length."""
-    def __init__(self):
-        self.name = 'True strain'
+    name = 'True strain'
 
-    def get_engineering_strain(self, true_strain):
-        """Converts the given value to engineering strain."""
-        return exp(true_strain) - 1
+    def from_stretch(stretch):
+        """Converts the given stretch to engineering strain."""
+        return log(stretch)
 
-    def get_stretch(self, true_strain):
-        """Converts the given value to stretch."""
-        return log(true_strain)
+    def to_stretch(true_strain):
+        """Converts the given true strain to stretch."""
+        return exp(true_strain)

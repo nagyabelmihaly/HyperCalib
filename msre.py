@@ -3,7 +3,6 @@ from numpy import array, zeros, sqrt, matmul, transpose
 class MSRE:
     name = "Mean Squared Relative Error"
     shortname = "MSRE"
-    sign = 1
 
     def __init__(self, func, jac, hess, xdata, ydata):
         """Initializes a MSRE instance whose objective function
@@ -22,7 +21,11 @@ class MSRE:
         self.func = func
         self.fjac = jac
         self.fhess = hess
-        self.data = list(zip(xdata, ydata))
+        
+        length = len(xdata)
+        not_origin_index = [y != 0.0 for y in ydata]
+        self.data = list(zip([xdata[i] for i in range(length) if not_origin_index[i]],
+                             [ydata[i] for i in range(length) if not_origin_index[i]]))
         self.n = len(self.data)
 
     def objfunc(self, params):

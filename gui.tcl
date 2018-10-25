@@ -69,7 +69,7 @@ proc vTclWindow.top37 {base} {
         -menu "$top.m50" -background {#d9d9d9} -highlightbackground {#d9d9d9} \
         -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 1531x694+248+228
+    wm geometry $top 985x694+455+158
     update
     # set in toplevel.wgt.
     global vTcl
@@ -80,7 +80,7 @@ proc vTclWindow.top37 {base} {
     wm overrideredirect $top 0
     wm resizable $top 1 1
     wm deiconify $top
-    wm title $top "Hyperelastic curve fit"
+    wm title $top "HyperCalib"
     vTcl:DefineAlias "$top" "Toplevel1" vTcl:Toplevel:WidgetProc "" 1
     button $top.but38 \
         -activebackground {#d9d9d9} -activeforeground {#000000} \
@@ -90,12 +90,12 @@ proc vTclWindow.top37 {base} {
         -text {Process File} 
     vTcl:DefineAlias "$top.but38" "ButtonProcess" vTcl:WidgetProc "Toplevel1" 1
     frame $top.fra38 \
-        -borderwidth 2 -relief groove -background {#d9d9d9} -height 280 \
-        -highlightbackground {#d9d9d9} -highlightcolor black -width 500 
+        -borderwidth 2 -relief groove -background {#d9d9d9} -height 320 \
+        -highlightbackground {#d9d9d9} -highlightcolor black -width 470 
     vTcl:DefineAlias "$top.fra38" "FramePlot" vTcl:WidgetProc "Toplevel1" 1
     frame $top.fra42 \
         -borderwidth 2 -relief groove -background {#d9d9d9} -height 40 \
-        -highlightbackground {#d9d9d9} -highlightcolor black -width 500 
+        -highlightbackground {#d9d9d9} -highlightcolor black -width 470 
     vTcl:DefineAlias "$top.fra42" "FrameNavigationPlot" vTcl:WidgetProc "Toplevel1" 1
     button $top.but45 \
         -activebackground {#d9d9d9} -activeforeground {#000000} \
@@ -105,42 +105,13 @@ proc vTclWindow.top37 {base} {
         -state disabled -text {Fit model} 
     vTcl:DefineAlias "$top.but45" "ButtonFitModel" vTcl:WidgetProc "Toplevel1" 1
     text $top.tex38 \
-        -background white -font TkTextFont -foreground {#000000} -height 330 \
+        -background white -font TkTextFont -foreground {#000000} -height 280 \
         -highlightbackground {#d9d9d9} -highlightcolor black \
         -insertbackground black -selectbackground {#c4c4c4} \
-        -selectforeground black -state disabled -width 500 -wrap word 
+        -selectforeground black -state disabled -width 470 -wrap word 
     .top37.tex38 configure -font TkTextFont
     .top37.tex38 insert end text
     vTcl:DefineAlias "$top.tex38" "TextLog" vTcl:WidgetProc "Toplevel1" 1
-    checkbutton $top.che38 \
-        -activebackground {#d9d9d9} -activeforeground {#000000} -anchor nw \
-        -background {#d9d9d9} -command gui_support.is_fit_changed \
-        -disabledforeground {#a3a3a3} -foreground {#000000} \
-        -highlightbackground {#d9d9d9} -highlightcolor black -justify left \
-        -state disabled -text {Uniaxial tension} \
-        -variable {gui_support.isPlot[0]} 
-    vTcl:DefineAlias "$top.che38" "CheckbuttonPlotUT" vTcl:WidgetProc "Toplevel1" 1
-    checkbutton $top.che41 \
-        -activebackground {#d9d9d9} -activeforeground {#000000} -anchor nw \
-        -background {#d9d9d9} -command gui_support.is_fit_changed \
-        -disabledforeground {#a3a3a3} -foreground {#000000} \
-        -highlightbackground {#d9d9d9} -highlightcolor black -justify left \
-        -state disabled -text {Equibiaxial tension} \
-        -variable {gui_support.isPlot[1]} 
-    vTcl:DefineAlias "$top.che41" "CheckbuttonPlotET" vTcl:WidgetProc "Toplevel1" 1
-    checkbutton $top.che43 \
-        -activebackground {#d9d9d9} -activeforeground {#000000} -anchor nw \
-        -background {#d9d9d9} -command gui_support.is_fit_changed \
-        -disabledforeground {#a3a3a3} -foreground {#000000} \
-        -highlightbackground {#d9d9d9} -highlightcolor black -justify left \
-        -state disabled -text {Pure shear} -variable {gui_support.isPlot[2]} 
-    vTcl:DefineAlias "$top.che43" "CheckbuttonPlotPS" vTcl:WidgetProc "Toplevel1" 1
-    label $top.lab44 \
-        -activebackground {#f9f9f9} -activeforeground black -anchor nw \
-        -background {#d9d9d9} -disabledforeground {#a3a3a3} \
-        -foreground {#000000} -highlightbackground {#d9d9d9} \
-        -highlightcolor black -text Plot: 
-    vTcl:DefineAlias "$top.lab44" "Label4" vTcl:WidgetProc "Toplevel1" 1
     label $top.lab38 \
         -activebackground {#f9f9f9} -activeforeground black \
         -background {#d9d9d9} -disabledforeground {#a3a3a3} \
@@ -152,21 +123,28 @@ proc vTclWindow.top37 {base} {
         -activebackground {#d8d8d8} -activeforeground {#000000} \
         -background {#d9d9d9} -font font9 -foreground {#000000} -tearoff 0 
     text $top.tex39 \
-        -background white -font font9 -foreground black -height 270 \
+        -background white -font font9 -foreground black -height 160 \
         -highlightbackground {#d9d9d9} -highlightcolor black \
         -insertbackground black -selectbackground {#c4c4c4} \
-        -selectforeground black -state disabled -width 500 -wrap word 
+        -selectforeground black -state disabled -width 470 -wrap word 
     .top37.tex39 configure -font font9
     .top37.tex39 insert end text
     vTcl:DefineAlias "$top.tex39" "TextState" vTcl:WidgetProc "Toplevel1" 1
     frame $top.fra40 \
-        -borderwidth 2 -relief groove -background {#d9d9d9} -height 275 \
-        -highlightbackground {#d9d9d9} -highlightcolor black -width 615 
+        -borderwidth 2 -relief groove -background {#d9d9d9} -height 320 \
+        -highlightbackground {#d9d9d9} -highlightcolor black -width 470 
     vTcl:DefineAlias "$top.fra40" "FrameError" vTcl:WidgetProc "Toplevel1" 1
     frame $top.fra41 \
-        -borderwidth 2 -relief groove -background {#d9d9d9} -height 35 \
-        -highlightbackground {#d9d9d9} -highlightcolor black -width 615 
+        -borderwidth 2 -relief groove -background {#d9d9d9} -height 40 \
+        -highlightbackground {#d9d9d9} -highlightcolor black -width 470 
     vTcl:DefineAlias "$top.fra41" "FrameNavigationError" vTcl:WidgetProc "Toplevel1" 1
+    button $top.but39 \
+        -activebackground {#d9d9d9} -activeforeground {#000000} \
+        -background {#d9d9d9} -command ButtonPlotSettings_Click \
+        -disabledforeground {#a3a3a3} -foreground {#000000} \
+        -highlightbackground {#d9d9d9} -highlightcolor black -pady 0 \
+        -text {Plot settings} 
+    vTcl:DefineAlias "$top.but39" "ButtonPlotSettings" vTcl:WidgetProc "Toplevel1" 1
     ###################
     # SETTING GEOMETRY
     ###################
@@ -174,36 +152,31 @@ proc vTclWindow.top37 {base} {
         -in $top -x 20 -y 20 -width 470 -relwidth 0 -height 26 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.fra38 \
-        -in $top -x 510 -y 350 -width 500 -relwidth 0 -height 280 \
-        -relheight 0 -anchor nw -bordermode ignore 
+        -in $top -x 20 -y 310 -width 470 -relwidth 0 -height 320 -relheight 0 \
+        -anchor nw -bordermode ignore 
     place $top.fra42 \
-        -in $top -x 510 -y 640 -width 500 -relwidth 0 -height 40 -relheight 0 \
+        -in $top -x 20 -y 640 -width 470 -relwidth 0 -height 40 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.but45 \
         -in $top -x 20 -y 60 -width 470 -relwidth 0 -height 26 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.tex38 \
-        -in $top -x 1020 -y 10 -width 500 -relwidth 0 -height 330 \
-        -relheight 0 -anchor nw -bordermode ignore 
-    place $top.che38 \
-        -in $top -x 570 -y 310 -anchor nw -bordermode ignore 
-    place $top.che41 \
-        -in $top -x 730 -y 310 -anchor nw -bordermode ignore 
-    place $top.che43 \
-        -in $top -x 900 -y 310 -anchor nw -bordermode ignore 
-    place $top.lab44 \
-        -in $top -x 520 -y 310 -anchor nw -bordermode ignore 
+        -in $top -x 500 -y 20 -width 470 -relwidth 0 -height 280 -relheight 0 \
+        -anchor nw -bordermode ignore 
     place $top.lab38 \
         -in $top -x 30 -y 490 -anchor nw -bordermode ignore 
     place $top.tex39 \
-        -in $top -x 510 -y 10 -width 500 -relwidth 0 -height 270 -relheight 0 \
+        -in $top -x 20 -y 100 -width 470 -relwidth 0 -height 160 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.fra40 \
-        -in $top -x 1020 -y 350 -width 500 -relwidth 0 -height 280 \
+        -in $top -x 500 -y 310 -width 470 -relwidth 0 -height 320 \
         -relheight 0 -anchor nw -bordermode ignore 
     place $top.fra41 \
-        -in $top -x 1020 -y 640 -width 500 -relwidth 0 -height 40 \
-        -relheight 0 -anchor nw -bordermode ignore 
+        -in $top -x 500 -y 640 -width 470 -relwidth 0 -height 40 -relheight 0 \
+        -anchor nw -bordermode ignore 
+    place $top.but39 \
+        -in $top -x 20 -y 270 -width 470 -relwidth 0 -height 26 -relheight 0 \
+        -anchor nw -bordermode ignore 
 
     vTcl:FireEvent $base <<Ready>>
 }

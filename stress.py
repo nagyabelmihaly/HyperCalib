@@ -1,26 +1,25 @@
 class EngineeringStress:
     """Engineering stress is the ratio of force
     and original cross section area."""
-    def __init__(self):
-        self.name = 'Engineering stress'
+    name = 'Engineering stress'
 
-    def get_engineering_stress(self, engineering_stress, stretch):
-        """Converts the given stress value to engineering stress.
+    def from_true_stress(true_stress, stretch):
+        """Converts the given true stress to engineering stress.
         ----------
         Keyword arguments:
-        engineering_stress -- Stress value to convert.
+        true_stress -- True stress to convert.
         stretch -- The ratio of deformed length and original length.
         ----------
         Returns:
         The value of converted engineering stress.
         """
-        return engineering_stress
+        return true_stress / stretch
 
-    def get_true_stress(self, engineering_stress, stretch):
-        """Converts the given stress value to true stress.
+    def to_true_stress(engineering_stress, stretch):
+        """Converts the given engineering stress to true stress.
         ----------
         Keyword arguments:
-        engineering_stress -- Stress value to convert.
+        engineering_stress -- Engineering stress to convert.
         stretch -- The ratio of deformed length and original length.
         ----------
         Returns:
@@ -31,26 +30,25 @@ class EngineeringStress:
 class TrueStress:
     """True stress is the ratio of force
     and actual cross section area."""
-    def __init__(self):
-        self.name = 'True stress'
+    name = 'True stress'
 
-    def get_engineering_stress(self, true_stress, stretch):
-        """Converts the given stress value to engineering stress.
+    def from_true_stress(true_stress, stretch):
+        """Converts the given true stress to true stress.
         ----------
         Keyword arguments:
-        true_stress -- Stress value to convert.
+        true_stress -- True stress to convert.
         stretch -- The ratio of deformed length and original length.
         ----------
         Returns:
-        The value of converted engineering stress.
+        The value of converted true stress.
         """
-        return true_stress / stretch
+        return true_stress
 
-    def get_true_stress(self, true_stress, stretch):
-        """Converts the given stress value to true stress.
+    def to_true_stress(true_stress, stretch):
+        """Converts the given true stress to true stress.
         ----------
         Keyword arguments:
-        true_stress -- Stress value to convert.
+        true_stress -- True stress to convert.
         stretch -- The ratio of deformed length and original length.
         ----------
         Returns:

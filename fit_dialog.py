@@ -15,7 +15,6 @@ from arruda_boyce import ArrudaBoyce
 
 from mse import MSE
 from msre import MSRE
-from cod import COD
 from weighted_error import WeightedError
 
 from trust_constr import TrustConstr
@@ -195,7 +194,7 @@ class PageTwo(tk.Frame):
         # Initialize models, errors and methods.
         self.models = [Ogden(1), Ogden(2), Ogden(3), NeoHooke(), MooneyRivlin(), 
                        Yeoh(), ArrudaBoyce()]
-        self.error_functions = [MSE, MSRE, COD]
+        self.error_functions = [MSE, MSRE]
         self.methods = [TrustConstr(), Cobyla(), Slsqp()]
 
         # Initialize list of available models.
