@@ -78,36 +78,36 @@ class GuiSupport:
 
         # TODO: delete
         # Load data to speedup developement process.
-        #dp = DataProcessor()
-        #dp.load_file('data/ut.csv')
-        #dp.parse_csv()
-        #dp.define_data(EngineeringStrain(), 1, EngineeringStress(), 2)
-        #self.xdatas[0], self.ydatas[0] = dp.stretch, dp.true_stress
-        #self.isPlot[0].set(True)
-        #dp.load_file('data/et.csv')
-        #dp.parse_csv()
-        #dp.define_data(EngineeringStrain(), 1, EngineeringStress(), 2)
-        #self.xdatas[1], self.ydatas[1] = dp.stretch, dp.true_stress
-        #self.isPlot[1].set(True)
-        #dp.load_file('data/planar.csv')
-        #dp.parse_csv()
-        #dp.define_data(EngineeringStrain(), 1, EngineeringStress(), 2)
-        #self.xdatas[2], self.ydatas[2] = dp.stretch, dp.true_stress
-        #self.isPlot[2].set(True)
-        #self.w.ButtonFitModel['state'] = tk.NORMAL
-        #for defmode_index in range(3):
-        #    self.plot_checkbuttons[defmode_index]['state'] = tk.NORMAL
-        #self.plot()
-
         dp = DataProcessor()
-        dp.load_file('data/TRELOARUT.csv')
-        dp.parse_csv(',', '.')
-        dp.define_data(Stretch(), 1, EngineeringStress(), 2)
+        dp.load_file('data/ut.csv')
+        dp.parse_csv()
+        dp.define_data(EngineeringStrain(), 1, EngineeringStress(), 2)
         self.xdatas[0], self.ydatas[0] = dp.stretch, dp.true_stress
         self.isPlot[0].set(True)
+        dp.load_file('data/et.csv')
+        dp.parse_csv()
+        dp.define_data(EngineeringStrain(), 1, EngineeringStress(), 2)
+        self.xdatas[1], self.ydatas[1] = dp.stretch, dp.true_stress
+        self.isPlot[1].set(True)
+        dp.load_file('data/planar.csv')
+        dp.parse_csv()
+        dp.define_data(EngineeringStrain(), 1, EngineeringStress(), 2)
+        self.xdatas[2], self.ydatas[2] = dp.stretch, dp.true_stress
+        self.isPlot[2].set(True)
         self.w.ButtonFitModel['state'] = tk.NORMAL
-        self.plot_checkbuttons[0]['state'] = tk.NORMAL
+        for defmode_index in range(3):
+            self.plot_checkbuttons[defmode_index]['state'] = tk.NORMAL
         self.plot()
+
+        #dp = DataProcessor()
+        #dp.load_file('data/TRELOARUT.csv')
+        #dp.parse_csv(',', '.')
+        #dp.define_data(Stretch(), 1, EngineeringStress(), 2)
+        #self.xdatas[0], self.ydatas[0] = dp.stretch, dp.true_stress
+        #self.isPlot[0].set(True)
+        #self.w.ButtonFitModel['state'] = tk.NORMAL
+        #self.plot_checkbuttons[0]['state'] = tk.NORMAL
+        #self.plot()
 
     def SetTkVar(self):      
         """Sets the TkInter variables referenced by the widgets."""
@@ -194,10 +194,11 @@ Error: {0:.4g}
 Elapsed time: {1:.4f} s
 {2}""".format(result.fun, elapsed_time, result.print))
 
-    def update_model(self, xk, state):
+    def update_model(self, xk, state=None):
         self.params = xk
-        self.error_values.append(state.fun)
-        if state.niter % 100 == 0:
+        err_val = self.weighted_error.objfunc(xk)
+        self.error_values.append(err_val)
+        if state is not None and state.niter % 100 == 0:
             self.plot()
 
     def plot(self):
@@ -212,7 +213,7 @@ Elapsed time: {1:.4f} s
             ydata = self.ydatas[defmode]
             label = self.titles[defmode]
             if self.errors[defmode] is not None and self.params is not None:
-                label += ' - error={:.4g}'.format(self.errors[defmode].objfunc(self.params))
+                label += ' - {}={:.4g}'.format(self.error_function.shortname, self.errors[defmode].objfunc(self.params))
             self.plt.plot(xdata, ydata, marker='o', linestyle='', color=self.data_colors[defmode], label=label)
             is_empty = False
         
@@ -232,7 +233,8 @@ Elapsed time: {1:.4f} s
             set_text(self.w.TextState, '\n'.join(['{} = {:.4g}' \
                 .format(self.model.paramnames[i], self.params[i]) \
                 for i in range(self.model.paramcount)]) + \
-                '\n\nerror = {:.4f}'.format(self.weighted_error.objfunc(self.params)))
+                '\n\n{} = {:.4f}'.format(self.error_function.name,
+                                         self.error_function.sign * self.weighted_error.objfunc(self.params)))
             pass
 
         if not is_empty:        
@@ -247,7 +249,8 @@ Elapsed time: {1:.4f} s
         if self.error_values is not None:
             self.pltErr.plot(range(len(self.error_values)), self.error_values, '-k')
             self.pltErr.set_xlabel('iterations')
-            self.pltErr.set_ylabel('error function')
+            self.pltErr.set_ylabel('error (logarithmic)')
+            self.pltErr.set_yscale('log')
             self.canvasErr.draw()
             self.toolbarErr.update()    
 

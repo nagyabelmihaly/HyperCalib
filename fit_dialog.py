@@ -11,6 +11,7 @@ from ogden import Ogden
 from neo_hooke import NeoHooke
 from mooney_rivlin import MooneyRivlin
 from yeoh import Yeoh
+from arruda_boyce import ArrudaBoyce
 
 from mse import MSE
 from msre import MSRE
@@ -192,7 +193,8 @@ class PageTwo(tk.Frame):
         buttonNext.grid(row=3, column=1)
 
         # Initialize models, errors and methods.
-        self.models = [Ogden(1), Ogden(2), Ogden(3), NeoHooke(), MooneyRivlin(), Yeoh()]
+        self.models = [Ogden(1), Ogden(2), Ogden(3), NeoHooke(), MooneyRivlin(), 
+                       Yeoh(), ArrudaBoyce()]
         self.error_functions = [MSE, MSRE, COD]
         self.methods = [TrustConstr(), Cobyla(), Slsqp()]
 
@@ -286,12 +288,22 @@ class PageTrustConstr(tk.Frame):
         labelHess = tk.Label(self, text='Calculate Hessian:')
         labelXtol = tk.Label(self, text='Xtol:')
         labelGtol = tk.Label(self, text='Gtol:')
+        labelBtol = tk.Label(self, text='Barrier tolerance:')
         labelMaxiter = tk.Label(self, text='Maximum iterations:')
+        labelInitConstrPen = tk.Label(self, text='Initial constrains penalty:')
+        labelInitTrustRad = tk.Label(self, text='Initial trust radius:')
+        labelInitBarrPar = tk.Label(self, text='Initial barrier parameter:')
+        labelInitBarrTol = tk.Label(self, text='Initial barrier tolerance:')
         self.checkbuttonJac = tk.Checkbutton(self, variable=self.calcJac)
         self.checkbuttonHess = tk.Checkbutton(self, variable=self.calcHess)
         self.entryXtol = tk.Entry(self)
         self.entryGtol = tk.Entry(self)
+        self.entryBtol = tk.Entry(self)
         self.entryMaxiter = tk.Entry(self)
+        self.entryInitConstrPen = tk.Entry(self)
+        self.entryInitTrustRad = tk.Entry(self)
+        self.entryInitBarrPar = tk.Entry(self)
+        self.entryInitBarrTol = tk.Entry(self)
         buttonPrev = tk.Button(self, text="<<",
                                command=lambda: controller.show_frame("PageTwo"))
         buttonNext = tk.Button(self, text="FIT", command=self.next)
@@ -301,21 +313,36 @@ class PageTrustConstr(tk.Frame):
         labelHess.grid(row=1, column=0)
         labelXtol.grid(row=2, column=0)
         labelGtol.grid(row=3, column=0)
-        labelMaxiter.grid(row=4, column=0)
+        labelBtol.grid(row=4, column=0)
+        labelMaxiter.grid(row=5, column=0)
+        labelInitConstrPen.grid(row=6, column=0)
+        labelInitTrustRad.grid(row=7, column=0)
+        labelInitBarrPar.grid(row=8, column=0)
+        labelInitBarrTol.grid(row=9, column=0)
         self.checkbuttonJac.grid(row=0, column=1)
         self.checkbuttonHess.grid(row=1, column=1)
         self.entryXtol.grid(row=2, column=1)
         self.entryGtol.grid(row=3, column=1)
-        self.entryMaxiter.grid(row=4, column=1)
-        buttonPrev.grid(row=5, column=0)
-        buttonNext.grid(row=5, column=1)       
+        self.entryBtol.grid(row=4, column=1)
+        self.entryMaxiter.grid(row=5, column=1)
+        self.entryInitConstrPen.grid(row=6, column=1)
+        self.entryInitTrustRad.grid(row=7, column=1)
+        self.entryInitBarrPar.grid(row=8, column=1)
+        self.entryInitBarrTol.grid(row=9, column=1)
+        buttonPrev.grid(row=10, column=0)
+        buttonNext.grid(row=10, column=1)       
 
     def update(self):
          # Initialize default entry values.
         method = self.controller.method
         set_entry(self.entryXtol, str(method.xtol))
         set_entry(self.entryGtol, str(method.gtol))
+        set_entry(self.entryBtol, str(method.barrier_tol))
         set_entry(self.entryMaxiter, str(method.maxiter))
+        set_entry(self.entryInitConstrPen, str(method.initial_constr_penalty))
+        set_entry(self.entryInitTrustRad, str(method.initial_tr_radius))
+        set_entry(self.entryInitBarrPar, str(method.initial_barrier_parameter))
+        set_entry(self.entryInitBarrTol, str(method.initial_barrier_tolerance))
 
     def next(self):
         # Parse parameters from GUI.
@@ -332,6 +359,12 @@ class PageTrustConstr(tk.Frame):
             messagebox.showerror('ERROR', 'Invalid gtol value "' + s + '".')
             return
         try:
+            s = self.entryBtol.get().strip()
+            btol = float(s)
+        except ValueError:
+            messagebox.showerror('ERROR', 'Invalid barrier tolerance value "' + s + '".')
+            return
+        try:
             s = self.entryMaxiter.get().strip()
             maxiter = int(s)
         except ValueError:
@@ -339,6 +372,30 @@ class PageTrustConstr(tk.Frame):
             return
         if maxiter < 1:
             messagebox.showerror('ERROR', 'Maximum iterations must be positive.')
+            return
+        try:
+            s = self.entryInitConstrPen.get().strip()
+            init_constr_pen = float(s)
+        except ValueError:
+            messagebox.showerror('ERROR', 'Invalid initial constrains penalty value "' + s + '".')
+            return
+        try:
+            s = self.entryInitTrustRad.get().strip()
+            init_trust_rad = float(s)
+        except ValueError:
+            messagebox.showerror('ERROR', 'Invalid initial trust radius value "' + s + '".')
+            return
+        try:
+            s = self.entryInitBarrPar.get().strip()
+            init_barr_par = float(s)
+        except ValueError:
+            messagebox.showerror('ERROR', 'Invalid initial barrier parameter value "' + s + '".')
+            return
+        try:
+            s = self.entryInitBarrTol.get().strip()
+            init_barr_tol = float(s)
+        except ValueError:
+            messagebox.showerror('ERROR', 'Invalid initial barrier tolerance value "' + s + '".')
             return
 
         # Set trust-constr specific parameters.
@@ -358,7 +415,12 @@ class PageTrustConstr(tk.Frame):
             method.hess = BFGS()
         method.xtol = xtol
         method.gtol = gtol
+        method.barrier_tol = btol
         method.maxiter = maxiter
+        method.initial_constr_penalty = init_constr_pen
+        method.initial_tr_radius = init_trust_rad
+        method.initial_barrier_parameter = init_barr_par
+        method.initial_barrier_tolerance = init_barr_tol
 
         self.controller.close()
 
@@ -447,13 +509,75 @@ class PageSlsqp(tk.Frame):
         self.controller = controller
 
         # Initialize widgets.
+        labelTol = tk.Label(self, text='Tol:')
+        labelMaxiter = tk.Label(self, text='Maxiter:')
+        labelFtol = tk.Label(self, text='Ftol:')
+        labelEps = tk.Label(self, text='Eps:')
+        self.entryTol = tk.Entry(self)
+        self.entryMaxiter = tk.Entry(self)
+        self.entryFtol = tk.Entry(self)
+        self.entryEps = tk.Entry(self)
         buttonPrev = tk.Button(self, text="<<",
                                command=lambda: controller.show_frame("PageTwo"))
         buttonNext = tk.Button(self, text="FIT", command=self.next)
         
         # Arrange widgets in grid.
-        buttonPrev.grid(row=1, column=0)
-        buttonNext.grid(row=1, column=2)
+        labelTol.grid(row=0, column=0)
+        labelMaxiter.grid(row=1, column=0)
+        labelFtol.grid(row=2, column=0)
+        labelEps.grid(row=3, column=0)
+        self.entryTol.grid(row=0, column=1)
+        self.entryMaxiter.grid(row=1, column=1)
+        self.entryFtol.grid(row=2, column=1)
+        self.entryEps.grid(row=3, column=1)
+        buttonPrev.grid(row=4, column=0)
+        buttonNext.grid(row=4, column=1)
+
+    def update(self):
+        # Initialize default entry values.
+        method = self.controller.method
+        set_entry(self.entryTol, '')
+        set_entry(self.entryMaxiter, str(method.maxiter))
+        set_entry(self.entryFtol, str(method.ftol))
+        set_entry(self.entryEps, str(method.eps))
 
     def next(self):
+        # Parse parameters from GUI.
+        try:
+            s = self.entryTol.get().strip()
+            if s == '':
+                tol = None
+            else:
+                tol = float(s)
+        except ValueError:
+            messagebox.showerror('ERROR', 'Invalid tol value "' + s + '".')
+            return
+        try:
+            s = self.entryMaxiter.get().strip()
+            maxiter = int(s)
+        except ValueError:
+            messagebox.showerror('ERROR', 'Invalid maximum iterations value "' + s + '".')
+            return
+        if maxiter < 1:
+            messagebox.showerror('ERROR', 'Maximum iterations must be positive.')
+            return
+        try:
+            s = self.entryFtol.get().strip()
+            ftol = float(s)
+        except ValueError:
+            messagebox.showerror('ERROR', 'Invalid ftol value "' + s + '".')
+            return
+        try:
+            s = self.entryEps.get().strip()
+            eps = float(s)
+        except ValueError:
+            messagebox.showerror('ERROR', 'Invalid eps value "' + s + '".')
+
+        # Set COBYLA specific parameters.
+        method = self.controller.method
+        method.tol = tol
+        method.maxiter = maxiter
+        method.ftol = ftol
+        method.eps = eps
+
         self.controller.close()

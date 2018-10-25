@@ -16,7 +16,7 @@ class WeightedError:
         """Returns the weighted error when the parameters are applied."""
         error = 0
         for err, weight in self.factors:
-            error += err.objfunc(params) * weight
+            error += err.sign * err.objfunc(params) * weight
         return error
     
     def jac(self, params):
@@ -24,13 +24,13 @@ class WeightedError:
         when the parameters are applied."""
         result = array([0.0] * len(params))
         for err, weight in self.factors:
-            result += err.jac(params) * weight
+            result += err.sign * err.jac(params) * weight
         return result
     
     def hess(self, params):
         """Calculates the Hessian matrix of the objective function
         when the parameters are applied."""
-        r = array([[sum(error.hess(params)[i, j] * weight \
+        r = array([[sum(error.sign * error.hess(params)[i, j] * weight \
             for error, weight in self.factors) \
             for i in range(len(params))] for j in range(len(params))])
         return r

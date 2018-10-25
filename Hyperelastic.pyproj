@@ -24,6 +24,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include=".vscode\.ropeproject\config.py" />
+    <Compile Include="arruda_boyce.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="cobyla.py">
       <SubType>Code</SubType>
     </Compile>

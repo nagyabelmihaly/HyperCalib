@@ -15,7 +15,6 @@ Rhobeg: {1}
 Maximum iterations: {2}
 Catol: {3}""".format(self.tol, self.rhobeg, self.maxiter, self.catol)
 
-
     def get_constraint(self):
         return {'type': 'ineq', 'fun': self.constraint}
 
@@ -31,7 +30,7 @@ Catol: {3}""".format(self.tol, self.rhobeg, self.maxiter, self.catol)
                                  'catol': self.catol})
         result.niter = 1
         result.print = """Number of function evaluations: {0}
-{1} {2}""".format(result.nfev,
-                 '' if result.success else 'Optimization failed.',
+{1}{2}""".format(result.nfev,
+                 '' if result.success else 'Optimization failed. ',
                  result.message)
         return result

@@ -2,6 +2,8 @@ from numpy import array, zeros, sqrt, matmul, transpose
 
 class MSE:
     name = "Mean Squared Error"
+    shortname = "MSE"
+    sign = 1
 
     def __init__(self, func, jac, hess, xdata, ydata):
         """Initializes a MSE instance whose objective function
