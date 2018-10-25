@@ -31,6 +31,9 @@ class GuiSupport:
         self.top_level = top
         self.root = top
 
+        # Set window icon.
+        self.root.iconbitmap('hypercalib.ico')
+
         # Initialize data variables.
         self.xdatas = [None] * 3
         self.ydatas = [None] * 3
@@ -89,25 +92,25 @@ class GuiSupport:
 
         # TODO: delete
         # Load data to speedup developement process.
-        #dp = DataProcessor()
-        #dp.load_file('data/ut.csv')
-        #dp.parse_csv()
-        #dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
-        #self.xdatas[0], self.ydatas[0] = dp.stretch, dp.true_stress
-        #self.plot_defmode[0] = True
-        #dp.load_file('data/et.csv')
-        #dp.parse_csv()
-        #dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
-        #self.xdatas[1], self.ydatas[1] = dp.stretch, dp.true_stress
-        #self.plot_defmode[1] = True
-        #dp.load_file('data/planar.csv')
-        #dp.parse_csv()
-        #dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
-        #self.xdatas[2], self.ydatas[2] = dp.stretch, dp.true_stress
-        #self.plot_defmode[2] = True
-        #self.w.ButtonFitModel['state'] = tk.NORMAL
-        #for defmode_index in range(3):
-        #    self.plot_defmode[defmode_index] = True
+        dp = DataProcessor()
+        dp.load_file('data/ut.csv')
+        dp.parse_csv()
+        dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
+        self.xdatas[0], self.ydatas[0] = dp.stretch, dp.true_stress
+        self.plot_defmode[0] = True
+        dp.load_file('data/et.csv')
+        dp.parse_csv()
+        dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
+        self.xdatas[1], self.ydatas[1] = dp.stretch, dp.true_stress
+        self.plot_defmode[1] = True
+        dp.load_file('data/planar.csv')
+        dp.parse_csv()
+        dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
+        self.xdatas[2], self.ydatas[2] = dp.stretch, dp.true_stress
+        self.plot_defmode[2] = True
+        self.w.ButtonFitModel['state'] = tk.NORMAL
+        for defmode_index in range(3):
+            self.plot_defmode[defmode_index] = True
 
         #dp = DataProcessor()
         #dp.load_file('data/TRELOARUT.csv')
