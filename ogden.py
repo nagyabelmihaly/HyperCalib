@@ -1,4 +1,4 @@
-from numpy import power, log, inf, array, empty
+from numpy import power, log, inf, array, empty, sqrt
 from scipy.optimize import NonlinearConstraint
 
 class Ogden:
@@ -9,6 +9,8 @@ class Ogden:
         self.name = "Ogden N=" + str(n)
         self.paramnames = ["mu" + str(k + 1) for k in range(n)] + \
                           ["alpha" + str(k + 1) for k in range(n)]
+        self.paramnames_latex = ['\\mu_{}'.format(str(k+1)) for k in range(n)] + \
+                                ['\\alpha_{}'.format(str(k+1)) for k in range(n)]
         self.paramcount = len(self.paramnames)
 
         self.jacm = empty(2 * n)
@@ -18,7 +20,7 @@ class Ogden:
         n = self.n
         mu = params[:n]
         alpha = params[n:]
-        return 2 * sum([mu[k] * (power(stretch, alpha[k] - 1) - power(stretch, -c * alpha[k] - 1)) for k in range(n)])
+        return 2 * sum([mu[k] / alpha[k] * (power(stretch, alpha[k]) - power(stretch, -c * alpha[k])) for k in range(n)])
 
     def jac(self, stretch, c, params):
         n = self.n
@@ -26,10 +28,12 @@ class Ogden:
         alpha = params[n:]
 
         for k in range(n):
-            self.jacm[k] = 2 * (power(stretch, alpha[k] - 1) - power(stretch, -c * alpha[k] - 1))
-            self.jacm[n + k] = 2 * mu[k] * log(stretch) * (power(stretch, alpha[k] - 1) + c * power(stretch, -c * alpha[k] - 1))
+            self.jacm[k] = 2 / alpha[k] * (power(stretch, alpha[k]) - power(stretch, -c * alpha[k]))
+            self.jacm[n + k] = 2 * mu[k] * (-power(alpha[k], -2) * (power(stretch, alpha[k]) - power(stretch, -c * alpha[k])) +\
+                log(stretch) / alpha[k] * (power(stretch, alpha[k]) + c * power(stretch, -c * alpha[k])))
 
     def hess(self, stretch, c, params):
+        raise NotImplementedError()
         n = self.n
         mu = params[:n]
         alpha = params[n:]
@@ -52,6 +56,42 @@ class Ogden:
         """Returns the constrain of the Ogden model."""
         n = self.n
         return [sum([x[i] * x[n + i] for i in range(n)])]
+
+    def func(self, defmode, stretch, *params):
+        if defmode == 0:
+            return self.ut(stretch, *params)
+        if defmode == 1:
+            return self.et(stretch, *params)
+        if defmode == 2:
+            return self.ps(stretch, *params)
+        raise NotImplementedError
+
+    def getfunc(self, defmode):
+        if defmode == 0:
+            return self.ut
+        if defmode == 1:
+            return self.et
+        if defmode == 2:
+            return self.ps
+        raise NotImplementedError
+
+    def getjac(self, defmode):
+        if defmode == 0:
+            return self.ut_jac
+        if defmode == 1:
+            return self.et_jac
+        if defmode == 2:
+            return self.ps_jac
+        raise NotImplementedError
+
+    def gethess(self, defmode):
+        if defmode == 0:
+            return self.ut_hess
+        if defmode == 1:
+            return self.et_hess
+        if defmode == 2:
+            return self.ps_hess
+        raise NotImplementedError
 
     def ut(self, stretch, *params):
         """Represents the Ogden model to uniaxial tension."""

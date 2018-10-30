@@ -69,7 +69,7 @@ proc vTclWindow.top37 {base} {
         -menu "$top.m50" -background {#d9d9d9} -highlightbackground {#d9d9d9} \
         -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 985x694+455+158
+    wm geometry $top 985x694+112+42
     update
     # set in toplevel.wgt.
     global vTcl
@@ -145,6 +145,13 @@ proc vTclWindow.top37 {base} {
         -highlightbackground {#d9d9d9} -highlightcolor black -pady 0 \
         -text {Plot settings} 
     vTcl:DefineAlias "$top.but39" "ButtonPlotSettings" vTcl:WidgetProc "Toplevel1" 1
+    button $top.but40 \
+        -activebackground {#d9d9d9} -activeforeground {#000000} \
+        -background {#d9d9d9} -command ButtonCreateReport_Click \
+        -disabledforeground {#a3a3a3} -foreground {#000000} \
+        -highlightbackground {#d9d9d9} -highlightcolor black -pady 0 \
+        -state disabled -text {Create report} 
+    vTcl:DefineAlias "$top.but40" "ButtonCreateReport" vTcl:WidgetProc "Toplevel1" 1
     ###################
     # SETTING GEOMETRY
     ###################
@@ -155,7 +162,7 @@ proc vTclWindow.top37 {base} {
         -in $top -x 20 -y 310 -width 470 -relwidth 0 -height 320 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.fra42 \
-        -in $top -x 20 -y 640 -width 470 -relwidth 0 -height 40 -relheight 0 \
+        -in $top -x 20 -y 640 -width 230 -relwidth 0 -height 40 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.but45 \
         -in $top -x 20 -y 60 -width 470 -relwidth 0 -height 26 -relheight 0 \
@@ -177,6 +184,9 @@ proc vTclWindow.top37 {base} {
     place $top.but39 \
         -in $top -x 20 -y 270 -width 470 -relwidth 0 -height 26 -relheight 0 \
         -anchor nw -bordermode ignore 
+    place $top.but40 \
+        -in $top -x 260 -y 640 -width 230 -height 40 -anchor nw \
+        -bordermode ignore 
 
     vTcl:FireEvent $base <<Ready>>
 }

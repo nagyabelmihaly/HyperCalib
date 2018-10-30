@@ -1,4 +1,4 @@
-from numpy import exp, log
+from numpy import exp, log, add
 
 class EngineeringStrain:
     """Engineering strain is the ratio of length change
@@ -7,11 +7,11 @@ class EngineeringStrain:
 
     def from_stretch(stretch):
         """Converts the given stretch to engineering strain."""
-        return stretch - 1
+        return add(stretch, - 1)
 
     def to_stretch(engineering_strain):
         """Converts the given engineering strain to stretch."""
-        return engineering_strain + 1
+        return add(engineering_strain, 1)
 
 class Stretch:
     """Stretch is the ratio of deformed length

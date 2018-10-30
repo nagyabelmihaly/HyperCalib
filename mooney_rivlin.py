@@ -6,8 +6,45 @@ class MooneyRivlin:
 
     def __init__(self):
         self.name = "Mooney-Rivlin"
-        self.paramnames = ["c10", "c01"]
+        self.paramnames = ["C10", "C01"]
+        self.paramnames_latex = ["C_{10}", "C_{01}"]
         self.paramcount = len(self.paramnames)
+
+    def func(self, defmode, stretch, c10, c01):
+        if defmode == 0:
+            return self.ut(stretch, c10, c01)
+        if defmode == 1:
+            return self.et(stretch, c10, c01)
+        if defmode == 2:
+            return self.ps(stretch, c10, c01)
+        raise NotImplementedError
+
+    def getfunc(self, defmode):
+        if defmode == 0:
+            return self.ut
+        if defmode == 1:
+            return self.et
+        if defmode == 2:
+            return self.ps
+        raise NotImplementedError
+
+    def getjac(self, defmode):
+        if defmode == 0:
+            return self.ut_jac
+        if defmode == 1:
+            return self.et_jac
+        if defmode == 2:
+            return self.ps_jac
+        raise NotImplementedError
+
+    def gethess(self, defmode):
+        if defmode == 0:
+            return self.ut_hess
+        if defmode == 1:
+            return self.et_hess
+        if defmode == 2:
+            return self.ps_hess
+        raise NotImplementedError
 
     def ut(self, stretch, c10, c01):
         """Represents the Mooney-Rivlin model to uniaxial tension."""

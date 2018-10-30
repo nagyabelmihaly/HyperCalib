@@ -5,7 +5,8 @@ class Yeoh:
     
     def __init__(self):
         self.name = "Yeoh"
-        self.paramnames = ["c10", "c20", "c30"]
+        self.paramnames = ["C10", "C20", "C30"]
+        self.paramnames_latex = ['C_{10}', 'C_{20}', 'C_{30}']
         self.paramcount = len(self.paramnames)
 
     def i1ut(self, stretch):
@@ -32,6 +33,42 @@ class Yeoh:
     def constraint(self, x):
         """Returns the constrain of the Yeoh model."""
         return x[0]
+
+    def func(self, defmode, stretch, c10, c20, c30):
+        if defmode == 0:
+            return self.ut(stretch, c10, c20, c30)
+        if defmode == 1:
+            return self.et(stretch, c10, c20, c30)
+        if defmode == 2:
+            return self.ps(stretch, c10, c20, c30)
+        raise NotImplementedError
+
+    def getfunc(self, defmode):
+        if defmode == 0:
+            return self.ut
+        if defmode == 1:
+            return self.et
+        if defmode == 2:
+            return self.ps
+        raise NotImplementedError
+
+    def getjac(self, defmode):
+        if defmode == 0:
+            return self.ut_jac
+        if defmode == 1:
+            return self.et_jac
+        if defmode == 2:
+            return self.ps_jac
+        raise NotImplementedError
+
+    def gethess(self, defmode):
+        if defmode == 0:
+            return self.ut_hess
+        if defmode == 1:
+            return self.et_hess
+        if defmode == 2:
+            return self.ps_hess
+        raise NotImplementedError
 
     def ut(self, stretch, c10, c20, c30):
         """Represents the Yeoh model to uniaxial tension."""

@@ -13,8 +13,8 @@ from mooney_rivlin import MooneyRivlin
 from yeoh import Yeoh
 from arruda_boyce import ArrudaBoyce
 
-from mse import MSE
-from msre import MSRE
+from rmsae import RMSAE
+from rmsre import RMSRE
 from weighted_error import WeightedError
 
 from trust_constr import TrustConstr
@@ -73,16 +73,13 @@ class PageOne(tk.Frame):
         labelWeight = tk.Label(self, text='Weights used in optimization:')
         self.checkbuttonUT = tk.Checkbutton(self, variable=self.fitUT,
             state=tk.DISABLED if self.controller.xdatas[0] is None else tk.NORMAL,
-            command=self.update_state)
+            text='Uniaxial tension', command=self.update_state)
         self.checkbuttonET = tk.Checkbutton(self, variable=self.fitET,
             state=tk.DISABLED if self.controller.xdatas[1] is None else tk.NORMAL,
-            command=self.update_state)
+            text='Equibiaxial tension', command=self.update_state)
         self.checkbuttonPS = tk.Checkbutton(self, variable=self.fitPS,
             state=tk.DISABLED if self.controller.xdatas[2] is None else tk.NORMAL,
-            command=self.update_state)
-        labelUT = tk.Label(self, text='Uniaxial tension')
-        labelET = tk.Label(self, text='Equibiaxial tension')
-        labelPS = tk.Label(self, text='Pure shear')
+            text='Pure shear', command=self.update_state)
         self.entryUT = tk.Entry(self)
         self.entryET = tk.Entry(self)
         self.entryPS = tk.Entry(self)
@@ -92,18 +89,15 @@ class PageOne(tk.Frame):
         self.update_state()
 
         # Arrange widgets in grid.
-        labelWeight.grid(row=0, column=0, columnspan=3)
+        labelWeight.grid(row=0, column=0, columnspan=2)
         self.checkbuttonUT.grid(row=1, column=0)
-        labelUT.grid(row=1, column=1)
-        self.entryUT.grid(row=1, column=2)
+        self.entryUT.grid(row=1, column=1)
         self.checkbuttonET.grid(row=2, column=0)
-        labelET.grid(row=2, column=1)
-        self.entryET.grid(row=2, column=2)
+        self.entryET.grid(row=2, column=1)
         self.checkbuttonPS.grid(row=3, column=0)
-        labelPS.grid(row=3, column=1)
-        self.entryPS.grid(row=3, column=2)
+        self.entryPS.grid(row=3, column=1)
         buttonPrev.grid(row=4, column=0)
-        buttonNext.grid(row=4, column=2)
+        buttonNext.grid(row=4, column=1)
 
         # Initialize default entry values.
         set_entry(self.entryUT, '' if self.controller.xdatas[0] is None else '1')
@@ -194,7 +188,7 @@ class PageTwo(tk.Frame):
         # Initialize models, errors and methods.
         self.models = [Ogden(1), Ogden(2), Ogden(3), NeoHooke(), MooneyRivlin(), 
                        Yeoh(), ArrudaBoyce()]
-        self.error_functions = [MSE, MSRE]
+        self.error_functions = [RMSAE, RMSRE]
         self.methods = [TrustConstr(), Cobyla(), Slsqp()]
 
         # Initialize list of available models.

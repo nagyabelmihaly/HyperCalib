@@ -7,6 +7,7 @@ class ArrudaBoyce:
     def __init__(self):
         self.name = "Arruda-Boyce"
         self.paramnames = ["mu", "lambda_lock"]
+        self.paramnames_latex = ['\mu', '\lambda_{lock}']
         self.paramcount = len(self.paramnames)
     
         self.a = 1.31446
@@ -63,6 +64,42 @@ class ArrudaBoyce:
     def constraint(self, x):
         """Returns the constrain of the Arruda-Boyce model."""
         return x[0]
+
+    def func(self, defmode, stretch, mu, lambda_lock):
+        if defmode == 0:
+            return self.ut(stretch, mu, lambda_lock)
+        if defmode == 1:
+            return self.et(stretch, mu, lambda_lock)
+        if defmode == 2:
+            return self.ps(stretch, mu, lambda_lock)
+        raise NotImplementedError
+
+    def getfunc(self, defmode):
+        if defmode == 0:
+            return self.ut
+        if defmode == 1:
+            return self.et
+        if defmode == 2:
+            return self.ps
+        raise NotImplementedError
+
+    def getjac(self, defmode):
+        if defmode == 0:
+            return self.ut_jac
+        if defmode == 1:
+            return self.et_jac
+        if defmode == 2:
+            return self.ps_jac
+        raise NotImplementedError
+
+    def gethess(self, defmode):
+        if defmode == 0:
+            return self.ut_hess
+        if defmode == 1:
+            return self.et_hess
+        if defmode == 2:
+            return self.ps_hess
+        raise NotImplementedError
 
     def ut(self, stretch, mu, lambda_lock):
         """Represents the Arruda-Boyce model to uniaxial tension."""

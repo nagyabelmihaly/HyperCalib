@@ -1,3 +1,5 @@
+from numpy import multiply, divide
+
 class EngineeringStress:
     """Engineering stress is the ratio of force
     and original cross section area."""
@@ -13,7 +15,7 @@ class EngineeringStress:
         Returns:
         The value of converted engineering stress.
         """
-        return true_stress / stretch
+        return divide(true_stress, stretch)
 
     def to_true_stress(engineering_stress, stretch):
         """Converts the given engineering stress to true stress.
@@ -25,7 +27,7 @@ class EngineeringStress:
         Returns:
         The value of converted true stress.
         """
-        return stretch * engineering_stress
+        return multiply(stretch, engineering_stress)
 
 class TrueStress:
     """True stress is the ratio of force

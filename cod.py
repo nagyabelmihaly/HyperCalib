@@ -2,6 +2,7 @@ from numpy import power
 class COD:
     name = "Coefficient of determination (R^2)"
     shortname = "R^2"
+    name_latex = 'R^2'
 
     def __init__(self, func, jac, hess, xdata, ydata):
         self.func = func
@@ -22,5 +23,5 @@ class COD:
     def objfunc(self, params):
         res = 0.0
         for x, y in self.data:
-            res += power(y - self.func(x, *params), 2)            
+            res += power(y - self.func(x, *params), 2)
         return 1 - res / self.tot

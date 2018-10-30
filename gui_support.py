@@ -15,12 +15,17 @@ from utilities import *
 from file_dialog import FileDialog
 from fit_dialog import FitDialog
 from plot_settings_dialog import PlotSettingsDialog
+from create_report_dialog import CreateReportDialog
 
 from dataprocessor import DataProcessor
 
 from cod import COD
 from deformation import EngineeringStrain, Stretch, TrueStrain
 from stress import EngineeringStress, TrueStress
+
+from rmsae import RMSAE
+from rmsre import RMSRE
+from ogden import Ogden
 
 class GuiSupport:
     """Implements GUI functionality and provides a binding
@@ -40,6 +45,9 @@ class GuiSupport:
         self.plot_xdatas = [None] * 3
         self.plot_ydatas = [None] * 3
 
+        # Initialize filename variables.
+        self.filenames = [None] * 3
+
         # Initialize model and function variables.
         self.model = None
         self.funcs = [None] * 3
@@ -52,6 +60,7 @@ class GuiSupport:
         # Initialize error values variable.
         self.error_values = None
         self.errors = [None] * 3
+        self.fit_error = None
 
         # Initialize a Figure for plotting the model.
         fig = Figure(figsize=(5, 2), dpi=100)
@@ -93,24 +102,24 @@ class GuiSupport:
         # TODO: delete
         # Load data to speedup developement process.
         dp = DataProcessor()
-        dp.load_file('data/ut.csv')
-        dp.parse_csv()
-        dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
-        self.xdatas[0], self.ydatas[0] = dp.stretch, dp.true_stress
-        self.plot_defmode[0] = True
-        dp.load_file('data/et.csv')
-        dp.parse_csv()
-        dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
-        self.xdatas[1], self.ydatas[1] = dp.stretch, dp.true_stress
-        self.plot_defmode[1] = True
-        dp.load_file('data/planar.csv')
-        dp.parse_csv()
-        dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
-        self.xdatas[2], self.ydatas[2] = dp.stretch, dp.true_stress
-        self.plot_defmode[2] = True
+        self.filenames = ['data/ut.csv', 'data/et.csv', 'data/planar.csv']
+        for defmode in range(3):
+            dp.load_file(self.filenames[defmode])
+            dp.parse_csv()
+            dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
+            self.xdatas[defmode], self.ydatas[defmode] = dp.stretch, dp.true_stress
+            self.plot_defmode[defmode] = True
         self.w.ButtonFitModel['state'] = tk.NORMAL
-        for defmode_index in range(3):
-            self.plot_defmode[defmode_index] = True
+
+        # Test ogden ut
+        #print(self.xdatas[0], self.ydatas[0])
+        #model = Ogden(2)
+        #rmsae = RMSAE(model.ut, model.ut_jac, model.ut_hess, self.xdatas[0], self.ydatas[0])
+        #print('Abaqus RMSAE = ', rmsae.objfunc([6.5991E-3, 0.42654, 5.3619, -4.3558]))
+        #print('HyperCalib RMSAE = ', rmsae.objfunc([0.04209, 0.3044, 4.253, -0.588]))
+        #rmsre = RMSRE(model.ut, model.ut_jac, model.ut_hess, self.xdatas[0], self.ydatas[0])
+        #print('Abaqus RMSRE = ', rmsre.objfunc([6.5991E-3, 0.42654, 5.3619, -4.3558]))
+        #print('HyperCalib RMSRE = ', rmsre.objfunc([0.03719, 0.3292, 4.343, -0.4907]))
 
         #dp = DataProcessor()
         #dp.load_file('data/TRELOARUT.csv')
@@ -129,7 +138,8 @@ class GuiSupport:
     def ButtonProcess_Click(self):
         FileDialog(self.file_loaded)
 
-    def file_loaded(self, defmode, stretch, true_stress):
+    def file_loaded(self, defmode, stretch, true_stress, filename):
+        # Load read data into actual data variables.
         if defmode == 'UT':
             defmode_index = 0
         if defmode == 'ET':
@@ -146,6 +156,9 @@ class GuiSupport:
         # Enable model fitting.
         self.w.ButtonFitModel['state'] = tk.NORMAL
 
+        # Save filename.
+        self.filenames[defmode] = filename
+
     def ButtonFitModel_Click(self):
         FitDialog(self.xdatas, self.ydatas, self.start_fit)
 
@@ -161,6 +174,7 @@ class GuiSupport:
         # Disable buttons.
         self.w.ButtonProcess['state'] = tk.DISABLED
         self.w.ButtonFitModel['state'] = tk.DISABLED
+        self.w.ButtonCreateReport['state'] = tk.DISABLED
 
         self.model = model
         self.weights = weights
@@ -169,6 +183,7 @@ class GuiSupport:
         self.funcs = [model.ut, model.et, model.ps]
         self.jacobians = [model.ut_jac, model.et_jac, model.ps_jac]
         self.hessians = [model.ut_hess, model.et_hess, model.ps_hess]
+        self.fit_error = error_function
 
         self.functions = [model.ut, model.et, model.ps]
 
@@ -198,6 +213,13 @@ Optimization method: {3}
         PlotSettingsDialog(self.update_plot_settings, loaded_defmode, self.plot_defmode,
                            self.plot_error, self.plot_deformation, self.plot_stress)
 
+    def ButtonCreateReport_Click(self):
+        CreateReportDialog(self.xdatas, self.ydatas, self.model, 
+                           self.params, self.plot_defmode, self.plot_error,
+                           self.plot_deformation, self.plot_stress,
+                           self.filenames, self.weights, self.method,
+                           self.fit_error)
+
     def fit_model(self):
         start_time = process_time()
 
@@ -216,6 +238,7 @@ Elapsed time: {1:.4f} s
         # Enable buttons.
         self.w.ButtonProcess['state'] = tk.NORMAL
         self.w.ButtonFitModel['state'] = tk.NORMAL
+        self.w.ButtonCreateReport['state'] = tk.NORMAL
 
     def update_model(self, xk, state=None):
         self.params = xk
@@ -256,7 +279,7 @@ Elapsed time: {1:.4f} s
                     self.errors[defmode] = None
                 else:
                     self.errors[defmode] = error(self.funcs[defmode], self.jacobians[defmode], self.hessians[defmode],\
-                                 self.plot_xdatas[defmode], self.plot_ydatas[defmode])
+                                 self.xdatas[defmode], self.ydatas[defmode])
 
         # Update self variables.
         self.plot_error = error
@@ -356,3 +379,6 @@ def ButtonFitModel_Click():
 
 def ButtonPlotSettings_Click():
     gui_support.ButtonPlotSettings_Click()
+
+def ButtonCreateReport_Click():
+    gui_support.ButtonCreateReport_Click()

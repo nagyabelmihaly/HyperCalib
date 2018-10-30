@@ -52,7 +52,7 @@ class FileDialog(tk.Toplevel):
         defmode = self.radiovar.get()
         stretch = self.processor.stretch_limited
         true_stress = self.processor.true_stress_limited
-        self.callback(defmode, stretch, true_stress)
+        self.callback(defmode, stretch, true_stress, self.filename)
         self.destroy()
 
 class PageOne(tk.Frame):
@@ -78,14 +78,14 @@ class PageOne(tk.Frame):
         set_entry(self.entryFilename, filename)
 
     def next(self):
-        filename = self.entryFilename.get()
+        self.filename = self.entryFilename.get()
         try:
-            self.controller.processor.load_file(filename)
+            self.controller.processor.load_file(self.filename)
         except FileNotFoundError:
-            messagebox.showerror('Error', 'File ' + filename + ' was not found.')
+            messagebox.showerror('Error', 'File ' + self.filename + ' was not found.')
             return
         self.controller.frames['PageTwo'].labelFilename['text'] = \
-            "Filename: " + filename
+            "Filename: " + self.filename
         self.controller.show_frame("PageTwo")
 
 class PageTwo(tk.Frame):

@@ -33,6 +33,9 @@
     <Compile Include="cod.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="create_report_dialog.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="dataprocessor.py" />
     <Compile Include="deformation.py">
       <SubType>Code</SubType>
@@ -47,21 +50,20 @@
     <Compile Include="ogden.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="pdf_generator.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="plot_settings_dialog.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="rmsae.py" />
+    <Compile Include="rmsre.py" />
     <Compile Include="utilities.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="gui_support.py" />
     <Compile Include="input_generator.py" />
     <Compile Include="mooney_rivlin.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="mse.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="msre.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="neo_hooke.py">
