@@ -58,18 +58,19 @@
     </Compile>
     <Compile Include="rmsae.py" />
     <Compile Include="rmsre.py" />
+    <Compile Include="tex_generator.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="utilities.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="gui_support.py" />
-    <Compile Include="input_generator.py" />
     <Compile Include="mooney_rivlin.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="neo_hooke.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="sandbox.py" />
     <Compile Include="slsqp.py">
       <SubType>Code</SubType>
     </Compile>

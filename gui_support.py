@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
@@ -25,7 +26,15 @@ from stress import EngineeringStress, TrueStress
 
 from rmsae import RMSAE
 from rmsre import RMSRE
+from weighted_error import WeightedError
+from neo_hooke import NeoHooke
 from ogden import Ogden
+from mooney_rivlin import MooneyRivlin
+from yeoh import Yeoh
+from arruda_boyce import ArrudaBoyce
+from trust_constr import TrustConstr
+from pdf_generator import PdfGenerator
+from tex_generator import TexGenerator
 
 class GuiSupport:
     """Implements GUI functionality and provides a binding
@@ -50,9 +59,6 @@ class GuiSupport:
 
         # Initialize model and function variables.
         self.model = None
-        self.funcs = [None] * 3
-        self.jacobians = [None] * 3
-        self.hessians = [None] * 3
 
         # Initialize parameters variable.
         self.params = None
@@ -101,19 +107,125 @@ class GuiSupport:
 
         # TODO: delete
         # Load data to speedup developement process.
+
+        if False:
+            measurements = ['Treloar', '2012', '2015']
+            separators = [[',', '.'],
+                          [';', ','],
+                          [';', ',']]
+            quantities = [[Stretch, EngineeringStress],
+                          [EngineeringStrain, EngineeringStress],
+                          [EngineeringStrain, EngineeringStress]]
+            weightdata = [([1, 0, 0], 'UT'),
+                       ([0, 1, 0], 'ET'),
+                       ([0, 0, 1], 'PS'),
+                       ([1, 1, 0], 'UTET'),
+                       ([0, 1, 1], 'ETPS'),
+                       ([1, 0, 1], 'PSUT'),
+                       ([1, 1, 1], 'UTETPS')]
+            models = [Ogden(1), Ogden(2), Ogden(3), NeoHooke(), MooneyRivlin(), Yeoh(), ArrudaBoyce()]
+            error_functions = [RMSAE, RMSRE]
+            for measurement, separator, quantity in zip(measurements, separators, quantities):
+                dp = DataProcessor()
+                self.filenames = ['data/{}/ut.csv'.format(measurement),
+                                  'data/{}/et.csv'.format(measurement),
+                                  'data/{}/ps.csv'.format(measurement)]
+                for defmode in range(3):
+                    dp.load_file(self.filenames[defmode])
+                    dp.parse_csv(separator[0], separator[1])
+                    dp.define_data(quantity[0], 1, quantity[1], 2)
+                    self.xdatas[defmode], self.ydatas[defmode] = dp.stretch, dp.true_stress
+                    self.plot_defmode[defmode] = True
+                for model in models:
+                    self.model = model
+                    for error_function in error_functions:
+                        self.params = None                        
+                        errors = [error_function(model.getfunc(defmode), model.getjac(defmode),
+                                                 model.gethess(defmode), self.xdatas[defmode],
+                                                 self.ydatas[defmode]) for defmode in range(3)]
+                        self.update_plot_settings()
+                        for weights, weightname in weightdata:
+                            self.weighted_error = WeightedError(errors, weights)
+
+                            method = TrustConstr()
+                            method.objfunc = self.weighted_error.objfunc
+                            method.x0 = [1.0] * model.paramcount
+                            method.constraint = model.constraint
+                            if isinstance(model, ArrudaBoyce):
+                                method.jac = '2-point'
+                                method.calcJac = False
+                            else:
+                                method.jac = self.weighted_error.jac
+                                method.calcJac = True
+                            method.hess = BFGS()
+                            method.calcHess = False
+
+                            print("""Measurement: {}
+Deformation type: {}
+Hyperelastic model: {}
+Error function: {}""".format(measurement,
+                             weightname,
+                             model.name,
+                             error_function.name))
+                            self.error_values = []
+                            result = method.minimize(self.update_model)
+                            print('Model has been fitted.')
+
+                            pdfgen = PdfGenerator()
+                            pdfgen.xdatas = self.xdatas
+                            pdfgen.ydatas = self.ydatas
+                            pdfgen.model = model
+                            pdfgen.params = result.x
+                            pdfgen.plot_defmode = self.plot_defmode
+                            pdfgen.plot_error = error_function
+                            pdfgen.plot_deformation = quantity[0]
+                            pdfgen.plot_stress = quantity[1]
+                            pdfgen.filenames = self.filenames
+                            pdfgen.weights = weights
+                            pdfgen.method = method
+                            pdfgen.fit_error = error_function
+                            pdfgen.filename = os.getcwd() + '/Reports/{}-{}-{}-{}'.format( \
+                                measurement, weightname, model.name, error_function.shortname)
+                        
+                            pdfgen.generate()
+
+        # Load Treloar data
         dp = DataProcessor()
-        self.filenames = ['data/ut.csv', 'data/et.csv', 'data/planar.csv']
+        measurement = '2012'
+        self.filenames = ['data/{}/ut.csv'.format(measurement),
+                            'data/{}/et.csv'.format(measurement),
+                            'data/{}/ps.csv'.format(measurement)]
+        #model = Ogden(2)
         for defmode in range(3):
             dp.load_file(self.filenames[defmode])
-            dp.parse_csv()
+            dp.parse_csv(';', ',')
             dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
             self.xdatas[defmode], self.ydatas[defmode] = dp.stretch, dp.true_stress
             self.plot_defmode[defmode] = True
+            #self.errors[defmode] = RMSRE(model.getfunc(defmode), model.getjac(defmode),
+            #                             model.gethess(defmode), self.xdatas[defmode],
+            #                             self.ydatas[defmode])
+
+        #weighted_error = WeightedError(self.errors, [1, 0, 0])
+        #print('weighted error = ' + str(weighted_error.objfunc([1, 1, 1, 1])))
         self.w.ButtonFitModel['state'] = tk.NORMAL
 
-        # Test ogden ut
-        #print(self.xdatas[0], self.ydatas[0])
-        #model = Ogden(2)
+        # Generate Tex output
+        #texgen = TexGenerator()
+        #texgen.xdatas = self.xdatas
+        #texgen.ydatas = self.ydatas
+        #texgen.model = Ogden(2)
+        #texgen.params = [8.478e-5, 8.4781e-5, 8.7005, 8.7246]
+        #texgen.plot_defmode = [False, True, True]
+        #texgen.plot_error = RMSRE
+        #texgen.plot_deformation = Stretch
+        #texgen.plot_stress = EngineeringStress
+        #texgen.filenames = self.filenames
+        #texgen.filename = os.getcwd() + '\\example6b'
+                        
+        #texgen.generate()
+
+
         #rmsae = RMSAE(model.ut, model.ut_jac, model.ut_hess, self.xdatas[0], self.ydatas[0])
         #print('Abaqus RMSAE = ', rmsae.objfunc([6.5991E-3, 0.42654, 5.3619, -4.3558]))
         #print('HyperCalib RMSAE = ', rmsae.objfunc([0.04209, 0.3044, 4.253, -0.588]))
@@ -128,7 +240,7 @@ class GuiSupport:
         #self.xdatas[0], self.ydatas[0] = dp.stretch, dp.true_stress
         #self.plot_defmode[0] = True
         #self.w.ButtonFitModel['state'] = tk.NORMAL
-
+        
         self.update_plot_settings()
 
     def SetTkVar(self):      
@@ -157,7 +269,7 @@ class GuiSupport:
         self.w.ButtonFitModel['state'] = tk.NORMAL
 
         # Save filename.
-        self.filenames[defmode] = filename
+        self.filenames[defmode_index] = filename
 
     def ButtonFitModel_Click(self):
         FitDialog(self.xdatas, self.ydatas, self.start_fit)
@@ -180,9 +292,6 @@ class GuiSupport:
         self.weights = weights
         self.weighted_error = weighted_error
         self.method = method
-        self.funcs = [model.ut, model.et, model.ps]
-        self.jacobians = [model.ut_jac, model.et_jac, model.ps_jac]
-        self.hessians = [model.ut_hess, model.et_hess, model.ps_hess]
         self.fit_error = error_function
 
         self.functions = [model.ut, model.et, model.ps]
@@ -278,8 +387,11 @@ Elapsed time: {1:.4f} s
                 if self.model is None:
                     self.errors[defmode] = None
                 else:
-                    self.errors[defmode] = error(self.funcs[defmode], self.jacobians[defmode], self.hessians[defmode],\
-                                 self.xdatas[defmode], self.ydatas[defmode])
+                    self.errors[defmode] = error(self.model.getfunc(defmode),
+                                                 self.model.getjac(defmode),
+                                                 self.model.gethess(defmode),
+                                                 self.xdatas[defmode],
+                                                 self.ydatas[defmode])
 
         # Update self variables.
         self.plot_error = error
@@ -303,7 +415,7 @@ Elapsed time: {1:.4f} s
 
             label = self.titles[defmode]
             if self.errors[defmode] is not None and self.params is not None:
-                label += ' - {}={:.4g}'.format(self.plot_error.shortname, self.errors[defmode].objfunc(self.params))
+                label += ' - {} = {:.4g}'.format(self.plot_error.shortname, self.errors[defmode].objfunc(self.params))
             self.plt.plot(xdata, ydata, marker='o', linestyle='',
                           color=self.data_colors[defmode], label=label)
             is_empty = False
@@ -315,7 +427,7 @@ Elapsed time: {1:.4f} s
             y = np.zeros(len(xlin))
             for i in range(len(xlin)):
                 stretch = self.plot_deformation.to_stretch(xlin[i])
-                y[i] = self.plot_stress.from_true_stress(self.functions[defmode](stretch, *self.params), stretch)
+                y[i] = self.plot_stress.from_true_stress(self.model.getfunc(defmode)(stretch, *self.params), stretch)
             self.plt.plot(xlin, y, marker='', linestyle='-', color=self.fit_colors[defmode])
 
         if self.params is None:

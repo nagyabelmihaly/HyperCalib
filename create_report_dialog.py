@@ -1,8 +1,10 @@
+import os
 from subprocess import CalledProcessError
 
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
+from tkinter import filedialog
 
 from utilities import *
 
@@ -47,6 +49,7 @@ class CreateReportDialog(tk.Toplevel):
         labelError = tk.Label(self, text='Error:')
         labelDeformation = tk.Label(self, text='Deformation quantity:')
         labelStress = tk.Label(self, text='Stress quantity:')
+        labelFilename = tk.Label(self, text='Filename:')
         self.checkbuttonUT = tk.Checkbutton(self, variable=self.plotUT,
             state=tk.NORMAL if loaded_defmode[0] else tk.DISABLED,
             text='Uniaxial tension')
@@ -59,22 +62,27 @@ class CreateReportDialog(tk.Toplevel):
         self.comboboxError = ttk.Combobox(self, state='readonly')
         self.comboboxDeformation = ttk.Combobox(self, state='readonly')
         self.comboboxStress = ttk.Combobox(self, state='readonly')
+        self.entryFilename = tk.Entry(self)
+        self.buttonBrowse = tk.Button(self, text='Browse', command=self.browse)
         buttonCreate = tk.Button(self, text="Create", command=self.create)
         buttonCancel = tk.Button(self, text="Cancel", command=self.cancel)
 
         # Arrange widgets in grid.
-        labelDefmodes.grid(row=0, column=0, columnspan=1)
+        labelDefmodes.grid(row=0, column=0, columnspan=2)
         labelError.grid(row=4, column=0)
         labelDeformation.grid(row=5, column=0)
         labelStress.grid(row=6, column=0)
-        self.checkbuttonUT.grid(row=1, column=0, columnspan=1)
-        self.checkbuttonET.grid(row=2, column=0, columnspan=1)
-        self.checkbuttonPS.grid(row=3, column=0, columnspan=1)
-        self.comboboxError.grid(row=4, column=1)
-        self.comboboxDeformation.grid(row=5, column=1)
-        self.comboboxStress.grid(row=6, column=1)
-        buttonCreate.grid(row=7, column=0)
-        buttonCancel.grid(row=7, column=1)
+        labelFilename.grid(row=7, column=0)
+        self.checkbuttonUT.grid(row=1, column=0, columnspan=2)
+        self.checkbuttonET.grid(row=2, column=0, columnspan=2)
+        self.checkbuttonPS.grid(row=3, column=0, columnspan=2)
+        self.comboboxError.grid(row=4, column=1, columnspan=1)
+        self.comboboxDeformation.grid(row=5, column=1, columnspan=1)
+        self.comboboxStress.grid(row=6, column=1, columnspan=1)
+        self.entryFilename.grid(row=7, column=1)
+        self.buttonBrowse.grid(row=7, column=2)
+        buttonCreate.grid(row=8, column=0)
+        buttonCancel.grid(row=8, column=2)
 
         # Initialize errors, deformation and stress quantities.
         self.errors = [RMSAE, RMSRE, COD]
@@ -93,11 +101,21 @@ class CreateReportDialog(tk.Toplevel):
         self.comboboxStress['values'] = [s.name for s in self.stress_quantities]
         self.comboboxStress.current(self.stress_quantities.index(current_stress))
 
+    def browse(self):
+        options = {}
+        options['defaultextension'] = ".pdf"
+        options['filetypes'] = [('PDF files (*.pdf)', '.pdf'), ('All files (*.*)', '.*')]
+        options['initialdir'] = os.getcwd()
+        options['title'] = 'Save'
+        filename = filedialog.asksaveasfilename(**options)
+        set_entry(self.entryFilename, filename)
+
     def create(self):
         plot_defmode = [self.plotUT.get(), self.plotET.get(), self.plotPS.get()]
         error = self.errors[self.comboboxError.current()]
         deformation_quantity = self.deformation_quantities[self.comboboxDeformation.current()]
         stress_quantity = self.stress_quantities[self.comboboxStress.current()]
+        self.filename = self.entryFilename.get()
 
         pdfgen = PdfGenerator()
         pdfgen.xdatas = self.xdatas
@@ -112,6 +130,7 @@ class CreateReportDialog(tk.Toplevel):
         pdfgen.weights = self.weights
         pdfgen.method = self.method
         pdfgen.fit_error = self.fit_error
+        pdfgen.filename = self.filename
 
         try:
             pdfgen.generate()

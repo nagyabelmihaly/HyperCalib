@@ -69,7 +69,7 @@ proc vTclWindow.top37 {base} {
         -menu "$top.m50" -background {#d9d9d9} -highlightbackground {#d9d9d9} \
         -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 985x694+112+42
+    wm geometry $top 985x694+391+99
     update
     # set in toplevel.wgt.
     global vTcl
@@ -162,7 +162,7 @@ proc vTclWindow.top37 {base} {
         -in $top -x 20 -y 310 -width 470 -relwidth 0 -height 320 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.fra42 \
-        -in $top -x 20 -y 640 -width 230 -relwidth 0 -height 40 -relheight 0 \
+        -in $top -x 20 -y 640 -width 470 -relwidth 0 -height 40 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.but45 \
         -in $top -x 20 -y 60 -width 470 -relwidth 0 -height 26 -relheight 0 \
@@ -182,10 +182,10 @@ proc vTclWindow.top37 {base} {
         -in $top -x 500 -y 640 -width 470 -relwidth 0 -height 40 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.but39 \
-        -in $top -x 20 -y 270 -width 470 -relwidth 0 -height 26 -relheight 0 \
+        -in $top -x 20 -y 270 -width 230 -relwidth 0 -height 26 -relheight 0 \
         -anchor nw -bordermode ignore 
     place $top.but40 \
-        -in $top -x 260 -y 640 -width 230 -height 40 -anchor nw \
+        -in $top -x 260 -y 270 -width 230 -height 26 -anchor nw \
         -bordermode ignore 
 
     vTcl:FireEvent $base <<Ready>>

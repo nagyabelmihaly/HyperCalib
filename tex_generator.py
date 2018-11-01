@@ -10,7 +10,7 @@ from pylatex.utils import italic, bold
 from pylatex.package import Package
 import os
 
-class PdfGenerator:
+class TexGenerator:
 
     def __init__(self):
         plt.rcParams['pdf.fonttype'] = 42
@@ -31,54 +31,12 @@ class PdfGenerator:
             self.model_datas.append(zip(xlin, model.func(defmode, xlin, *tuple(params))))
 
     def generate(self):
-        geometry_options = {"lmargin": "2.5cm", "rmargin": "2.5cm", "tmargin": "1cm"}
+        geometry_options = {"paperwidth": "10cm", "paperheight": "8cm", "margin": "0cm"}
         doc = Document(geometry_options=geometry_options)
         doc.packages.append(Package('float'))
-        with doc.create(Center()):
-            doc.append(LargeText('Optimization Report'))
         with doc.create(Figure(position='H')) as plot:
             self.plot()
-            plot.add_plot(width=NoEscape('17cm'))
-        with doc.create(Section('Input:', False)):
-            with doc.create(Itemize()) as input:
-                input.add_item("Filenames:")
-                with doc.create(Itemize()) as filenames:
-                    for defmode in range(3):
-                        if self.plot_defmode[defmode]:
-                            filenames.add_item(self.titles[defmode] \
-                                + ': ' + self.filenames[defmode])
-                input.add_item("Weights:")
-                with doc.create(Itemize()) as weights:
-                    for defmode in range(3):
-                        if self.plot_defmode[defmode]:
-                            weights.add_item('{}: {:.4g}'.format( \
-                                self.titles[defmode], self.weights[defmode]))
-                input.add_item("Model: " + self.model.name)
-                input.add_item("Error function: " + self.fit_error.name)
-                input.add_item("Method: " + self.method.name)
-                with doc.create(Itemize()) as methodparams:
-                    for methodparam in self.method.print_params().split('\n'):
-                        methodparams.add_item(methodparam)
-        with doc.create(Section('Output:', False)):
-            with doc.create(Itemize()) as output:
-                s = '\\text{Errors: (}' + self.fit_error.name_latex + '\\text{)}'
-                output.add_item(Math(inline=True, data=s, escape=False))
-                with doc.create(Itemize()) as errorlist:
-                    weighted_error = 0.0
-                    for defmode in range(3):
-                        error = self.fit_error(self.model.getfunc(defmode),
-                                               self.model.getjac(defmode),
-                                               self.model.gethess(defmode),
-                                               self.xdatas[defmode], self.ydatas[defmode])
-                        errval = error.objfunc(self.params)
-                        weighted_error += errval * self.weights[defmode]
-                        errorlist.add_item('{}: {:.4g}'.format(self.titles[defmode], errval))
-                    errorlist.add_item('Weighted: {:.4g}'.format(weighted_error))
-                output.add_item('Parameters:')
-                with doc.create(Itemize()) as parameters:
-                    for pname, p in zip(self.model.paramnames_latex, self.params):
-                        s = '{}: {:.4g}'.format(pname, p)
-                        parameters.add_item(Math(inline=True, data=s, escape=False))
+            plot.add_plot(width=NoEscape('10cm'), height=NoEscape('8cm'))
         
         filename = os.path.splitext(self.filename)[0]
         doc.generate_pdf(filename, clean_tex=False, compiler='pdflatex')
@@ -109,7 +67,10 @@ class PdfGenerator:
                 stretch = self.plot_deformation.to_stretch(xlin[i])
                 y[i] = self.plot_stress.from_true_stress(self.model.getfunc(defmode)(stretch, *self.params), stretch)
             plt.plot(xlin, y, marker='', linestyle='-', color=self.fit_colors[defmode])
-                        
+        
+        s = '\n'.join(['${}$ = {: .4g}'.format(pname, p) for pname, p in zip(self.model.paramnames_latex, self.params)])
+        plt.text(0.75, 0.05, s, horizontalalignment='left', verticalalignment='bottom',
+                 transform=plt.gca().transAxes)
         plt.xlabel(self.plot_deformation.name)
         plt.ylabel(self.plot_stress.name)
         plt.legend()

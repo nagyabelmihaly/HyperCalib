@@ -32,16 +32,16 @@ class DataProcessor:
             raise ValueError('Deformation column index has to be positive.')
         if deformation_column > self.min_column_count:
             raise ValueError('Deformation column index ' + \
-                deformation_column + ' is out of range. ' + \
+                str(deformation_column) + ' is out of range. ' + \
                 'Number of full columns is ' + \
-                self.min_column_count + '.')
+                str(self.min_column_count) + '.')
         if stress_column < 1:
             raise ValueError('Stress column index has to be positive.')
         if stress_column > self.min_column_count:
             raise ValueError('Stress column index ' + \
-                stress_column + ' is out of range. ' + \
+                str(stress_column) + ' is out of range. ' + \
                 'Number of full columns is ' + \
-                self.min_column_count + '.')
+                str(self.min_column_count) + '.')
         self.stretch, self.true_stress = [], []
         rowindex = 0
         for row in self.raw:

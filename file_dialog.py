@@ -79,6 +79,7 @@ class PageOne(tk.Frame):
 
     def next(self):
         self.filename = self.entryFilename.get()
+        self.controller.filename = self.filename
         try:
             self.controller.processor.load_file(self.filename)
         except FileNotFoundError:
