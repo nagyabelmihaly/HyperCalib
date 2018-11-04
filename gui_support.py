@@ -190,25 +190,25 @@ Error function: {}""".format(measurement,
                             pdfgen.generate()
 
         # Load Treloar data
-        dp = DataProcessor()
-        measurement = '2012'
-        self.filenames = ['data/{}/ut.csv'.format(measurement),
-                            'data/{}/et.csv'.format(measurement),
-                            'data/{}/ps.csv'.format(measurement)]
-        #model = Ogden(2)
-        for defmode in range(3):
-            dp.load_file(self.filenames[defmode])
-            dp.parse_csv(';', ',')
-            dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
-            self.xdatas[defmode], self.ydatas[defmode] = dp.stretch, dp.true_stress
-            self.plot_defmode[defmode] = True
-            #self.errors[defmode] = RMSRE(model.getfunc(defmode), model.getjac(defmode),
-            #                             model.gethess(defmode), self.xdatas[defmode],
-            #                             self.ydatas[defmode])
+        #dp = DataProcessor()
+        #measurement = '2012'
+        #self.filenames = ['data/{}/ut.csv'.format(measurement),
+        #                    'data/{}/et.csv'.format(measurement),
+        #                    'data/{}/ps.csv'.format(measurement)]
+        ##model = Ogden(2)
+        #for defmode in range(3):
+        #    dp.load_file(self.filenames[defmode])
+        #    dp.parse_csv(';', ',')
+        #    dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
+        #    self.xdatas[defmode], self.ydatas[defmode] = dp.stretch, dp.true_stress
+        #    self.plot_defmode[defmode] = True
+        #    #self.errors[defmode] = RMSRE(model.getfunc(defmode), model.getjac(defmode),
+        #    #                             model.gethess(defmode), self.xdatas[defmode],
+        #    #                             self.ydatas[defmode])
 
-        #weighted_error = WeightedError(self.errors, [1, 0, 0])
-        #print('weighted error = ' + str(weighted_error.objfunc([1, 1, 1, 1])))
-        self.w.ButtonFitModel['state'] = tk.NORMAL
+        ##weighted_error = WeightedError(self.errors, [1, 0, 0])
+        ##print('weighted error = ' + str(weighted_error.objfunc([1, 1, 1, 1])))
+        #self.w.ButtonFitModel['state'] = tk.NORMAL
 
         # Generate Tex output
         #texgen = TexGenerator()

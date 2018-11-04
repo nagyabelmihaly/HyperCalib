@@ -24,7 +24,7 @@ class CreateReportDialog(tk.Toplevel):
         tk.Toplevel.__init__(self)
         self.grab_set()
         self.title('Create report')
-        self.geometry("%dx%d%+d%+d" % (600, 400, 300, 200))
+        self.geometry("%dx%d%+d%+d" % (400, 300, 300, 200))
 
         self.xdatas = xdatas
         self.ydatas = ydatas
@@ -68,21 +68,25 @@ class CreateReportDialog(tk.Toplevel):
         buttonCancel = tk.Button(self, text="Cancel", command=self.cancel)
 
         # Arrange widgets in grid.
-        labelDefmodes.grid(row=0, column=0, columnspan=2)
-        labelError.grid(row=4, column=0)
-        labelDeformation.grid(row=5, column=0)
-        labelStress.grid(row=6, column=0)
-        labelFilename.grid(row=7, column=0)
-        self.checkbuttonUT.grid(row=1, column=0, columnspan=2)
-        self.checkbuttonET.grid(row=2, column=0, columnspan=2)
-        self.checkbuttonPS.grid(row=3, column=0, columnspan=2)
-        self.comboboxError.grid(row=4, column=1, columnspan=1)
-        self.comboboxDeformation.grid(row=5, column=1, columnspan=1)
-        self.comboboxStress.grid(row=6, column=1, columnspan=1)
-        self.entryFilename.grid(row=7, column=1)
-        self.buttonBrowse.grid(row=7, column=2)
-        buttonCreate.grid(row=8, column=0)
-        buttonCancel.grid(row=8, column=2)
+        labelDefmodes.grid(row=0, column=0, columnspan=3, sticky=tk.W, padx=5)
+        labelError.grid(row=4, column=0, sticky=tk.W, padx=5)
+        labelDeformation.grid(row=5, column=0, sticky=tk.W, padx=5)
+        labelStress.grid(row=6, column=0, sticky=tk.W, padx=5)
+        labelFilename.grid(row=7, column=0, sticky=tk.W, padx=5)
+        self.checkbuttonUT.grid(row=1, column=0, columnspan=3, sticky=tk.W, padx=5)
+        self.checkbuttonET.grid(row=2, column=0, columnspan=3, sticky=tk.W, padx=5)
+        self.checkbuttonPS.grid(row=3, column=0, columnspan=3, sticky=tk.W, padx=5)
+        self.comboboxError.grid(row=4, column=1, columnspan=2, sticky=tk.W+tk.E, padx=5, pady=3)
+        self.comboboxDeformation.grid(row=5, column=1, columnspan=2, sticky=tk.W+tk.E, padx=5, pady=3)
+        self.comboboxStress.grid(row=6, column=1, columnspan=2, sticky=tk.W+tk.E, padx=5, pady=3)
+        self.entryFilename.grid(row=7, column=1, sticky=tk.W+tk.E, padx=5, pady=3)
+        self.buttonBrowse.grid(row=7, column=2, sticky=tk.E, padx=5)
+        tk.Frame(self).grid(row=8, column=0, columnspan=3, padx=5, pady=3)
+        buttonCreate.grid(row=9, column=0, sticky=tk.W, padx=5, pady=5)
+        buttonCancel.grid(row=9, column=2, sticky=tk.E, padx=5, pady=5)
+
+        self.grid_rowconfigure(8, weight=1)
+        self.grid_columnconfigure(1, weight=1)
 
         # Initialize errors, deformation and stress quantities.
         self.errors = [RMSAE, RMSRE, COD]

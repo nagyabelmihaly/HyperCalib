@@ -71,15 +71,16 @@ class DataProcessor:
         self.stretch_limited, self.true_stress_limited = self.stretch.copy(), self.true_stress.copy()
         if (samples > 2):
             while len(self.stretch_limited) > samples:
-                distances = [stretch_limited[i + 2] - stretch_limited[i] for i in range(len(stretch_limited) - 2)]
+                distances = [self.stretch_limited[i + 2] - self.stretch_limited[i] \
+                    for i in range(len(self.stretch_limited) - 3)]
                 minindex = distances.index(min(distances)) + 1
-                del stretch_limited[minindex]
-                del true_stress_limited[minindex]
+                del self.stretch_limited[minindex]
+                del self.true_stress_limited[minindex]
         elif samples == 2:
             # Keep the first and the last samples.
-            stretch_limited = [stretch_limited[0], stretch_limited[-1]]
-            true_stress_limited = [true_stress_limited[0], true_stress_limited[-1]]
+            self.stretch_limited = [self.stretch_limited[0], self.stretch_limited[-1]]
+            self.true_stress_limited = [self.true_stress_limited[0], self.true_stress_limited[-1]]
         elif samples == 1:
             # Keep the last sample.
-            stretch_limited = [stretch_limited[-1]]
-            true_stress_limited = [true_stress_limited[-1]]
+            self.stretch_limited = [self.stretch_limited[-1]]
+            self.true_stress_limited = [self.true_stress_limited[-1]]

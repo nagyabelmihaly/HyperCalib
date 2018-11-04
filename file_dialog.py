@@ -21,7 +21,7 @@ class FileDialog(tk.Toplevel):
         tk.Toplevel.__init__(self)
         self.grab_set()
         self.title('Process file')
-        self.geometry("%dx%d%+d%+d" % (600, 400, 300, 200))
+        self.geometry("%dx%d%+d%+d" % (400, 300, 300, 200))
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
@@ -35,13 +35,13 @@ class FileDialog(tk.Toplevel):
         self.radiovar = tk.StringVar(None, self.defaultvar)
 
         self.frames = {}
-        for F in (PageOne, PageTwo, PageThree, PageFour, PageFive):
+        for F in (PageTwo, PageThree, PageFour, PageFive):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
-        self.show_frame("PageOne")
+        self.show_frame("PageTwo")
 
     def show_frame(self, page_name):
         '''Show a frame for the given page name'''
@@ -55,22 +55,36 @@ class FileDialog(tk.Toplevel):
         self.callback(defmode, stretch, true_stress, self.filename)
         self.destroy()
 
-class PageOne(tk.Frame):
+class PageTwo(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-
+        
+        # Initialize widgets.
         label = tk.Label(self, text="Filename:")
         self.entryFilename = tk.Entry(self)
-        buttonBrowse = tk.Button(self, text="Browse", command=self.browse)        
+        buttonBrowse = tk.Button(self, text="Browse", command=self.browse)
+        labelDefmode = tk.Label(self, text='Deformation mode:')
+        rbUT = tk.Radiobutton(self, text='Uniaxial tension', value='UT', variable=controller.radiovar)
+        rbET = tk.Radiobutton(self, text='Equibiaxial tension', value='ET', variable=controller.radiovar)
+        rbPS = tk.Radiobutton(self, text='Pure shear', value='PS', variable=controller.radiovar)
         buttonPrev = tk.Button(self, text="<<", state=tk.DISABLED)
         buttonNext = tk.Button(self, text=">>", command=self.next)
+        
+        # Arrange widgets in a grid.
+        label.grid(row=0, column=0, sticky=tk.W, padx=5)
+        self.entryFilename.grid(row=0, column=1, sticky=tk.W+tk.E, padx=5)
+        buttonBrowse.grid(row=0, column=2, sticky=tk.E, padx=5, pady=5)
+        labelDefmode.grid(row=1, column=0, columnspan=3, sticky=tk.W, padx=5, pady=5)
+        rbUT.grid(row=2, column=0, columnspan=3, sticky=tk.W, padx=5, pady=3)
+        rbET.grid(row=3, column=0, columnspan=3, sticky=tk.W, padx=5, pady=3)
+        rbPS.grid(row=4, column=0, columnspan=3, sticky=tk.W, padx=5, pady=3)
+        tk.Frame(self).grid(row=5, column=0, columnspan=2)
+        buttonPrev.grid(row=6, column=0, sticky=tk.W, padx=5, pady=5)
+        buttonNext.grid(row=6, column=2, sticky=tk.E, padx=5, pady=5)
 
-        label.grid(row=0, column=0)
-        self.entryFilename.grid(row=0, column=1)
-        buttonBrowse.grid(row=0, column=2)
-        buttonPrev.grid(row=1, column=0)
-        buttonNext.grid(row=1, column=2)
+        self.grid_rowconfigure(5, weight=1)
+        self.grid_columnconfigure(1, weight=1)
 
     def browse(self):
         filename = filedialog.askopenfilename(initialdir=os.getcwd()+'/data',
@@ -85,32 +99,6 @@ class PageOne(tk.Frame):
         except FileNotFoundError:
             messagebox.showerror('Error', 'File ' + self.filename + ' was not found.')
             return
-        self.controller.frames['PageTwo'].labelFilename['text'] = \
-            "Filename: " + self.filename
-        self.controller.show_frame("PageTwo")
-
-class PageTwo(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.controller = controller
-        
-        self.labelFilename = tk.Label(self)
-        labelDefmode = tk.Label(self, text='Deformation mode:')
-        rbUT = tk.Radiobutton(self, text='Uniaxial tension', value='UT', variable=controller.radiovar)
-        rbET = tk.Radiobutton(self, text='Equibiaxial tension', value='ET', variable=controller.radiovar)
-        rbPS = tk.Radiobutton(self, text='Pure shear', value='PS', variable=controller.radiovar)
-        buttonPrev = tk.Button(self, text="<<", command=lambda: controller.show_frame("PageOne"))
-        buttonNext = tk.Button(self, text=">>", command=self.next)
-
-        self.labelFilename.grid(row=0, column=0, columnspan=2)
-        labelDefmode.grid(row=1, column=0, columnspan=2)
-        rbUT.grid(row=2, column=0, columnspan=2)
-        rbET.grid(row=3, column=0, columnspan=2)
-        rbPS.grid(row=4, column=0, columnspan=2)
-        buttonPrev.grid(row=5, column=0)
-        buttonNext.grid(row=5, column=1)
-
-    def next(self):
         if self.controller.radiovar.get() == self.controller.defaultvar:
             messagebox.showerror('Error', 'No deformation mode is selected.')
             return
@@ -121,7 +109,8 @@ class PageThree(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-
+        
+        # Initialize widgets.
         label1 = tk.Label(self, text='Delimiter:')
         label2 = tk.Label(self, text='Decimal separator:')
         self.entryDelimiter = tk.Entry(self)
@@ -129,16 +118,18 @@ class PageThree(tk.Frame):
         self.text = tk.Text(self, state=tk.DISABLED)
         buttonPrev = tk.Button(self, text="<<", command=lambda: controller.show_frame("PageTwo"))
         buttonNext = tk.Button(self, text=">>", command=self.next)
-
-        label1.grid(row=0, column=0)
-        label2.grid(row=1, column=0)
-        self.entryDelimiter.grid(row=0, column=1)
-        self.entryDecimalsep.grid(row=1, column=1)
-        self.text.grid(row=2, column=0, columnspan=2)
-        buttonPrev.grid(row=3, column=0)
-        buttonNext.grid(row=3, column=1)
+        
+        # Arrange widgets in a grid.
+        label1.grid(row=0, column=0, sticky=tk.W, padx=5)
+        label2.grid(row=1, column=0, sticky=tk.W, padx=5)
+        self.entryDelimiter.grid(row=0, column=1, sticky=tk.W+tk.E, padx=5, pady=3)
+        self.entryDecimalsep.grid(row=1, column=1, sticky=tk.W+tk.E, padx=5, pady=3)
+        self.text.grid(row=2, column=0, columnspan=2, padx=5, pady=3)
+        buttonPrev.grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
+        buttonNext.grid(row=3, column=1, sticky=tk.E, padx=5, pady=5)
 
         self.grid_rowconfigure(2, weight=1)
+        self.grid_columnconfigure(1, weight=1)
     
     def next(self):
         delimiter = self.entryDelimiter.get().strip()
@@ -155,8 +146,10 @@ class PageThree(tk.Frame):
         table = self.controller.frames['PageFour'].table
         table['columns'] = [str(c) for c in range(1, columns + 1)]
         table.heading('#0', text='No.')
+        table.column('#0', anchor='center', width=50, stretch=False)
         for c in range(1, columns + 1):
             table.heading(str(c), text='Column ' + str(c))
+            table.column(str(c), anchor='center', stretch=True)
         table.delete(*table.get_children())
         i = 0
         for row in processor.raw:
@@ -168,32 +161,32 @@ class PageFour(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-
-        label1 = tk.Label(self, text='Deformation quantity:')
-        label2 = tk.Label(self, text='Stress quantity:')
+        
+        # Initialize widgets.
         self.comboboxDeformation = ttk.Combobox(self, state='readonly')
         self.comboboxStress = ttk.Combobox(self, state='readonly')
-        label3 = tk.Label(self, text='Deformation column:')
-        label4 = tk.Label(self, text='Stress column:')
+        label3 = tk.Label(self, text='Column:')
+        label4 = tk.Label(self, text='Column:')
         self.entryDeformation = tk.Entry(self)
         self.entryStress = tk.Entry(self)
         self.table = ttk.Treeview(self)
         buttonPrev = tk.Button(self, text="<<", command=lambda: controller.show_frame("PageThree"))
         buttonNext = tk.Button(self, text=">>", command=self.next)
-
-        label1.grid(row=0, column=0)
-        label2.grid(row=1, column=0)
-        self.comboboxDeformation.grid(row=0, column=1)
-        self.comboboxStress.grid(row=1, column=1)
-        label3.grid(row=0, column=2)
-        label4.grid(row=1, column=2)
-        self.entryDeformation.grid(row=0, column=3)
-        self.entryStress.grid(row=1, column=3)
-        self.table.grid(row=2, column=0, columnspan=4)
-        buttonPrev.grid(row=3, column=0)
-        buttonNext.grid(row=3, column=3)
+        
+        # Arrange widgets in a grid.
+        self.comboboxDeformation.grid(row=0, column=0, sticky=tk.W+tk.E, padx=5, pady=3)
+        self.comboboxStress.grid(row=1, column=0, sticky=tk.W+tk.E, padx=5, pady=3)
+        label3.grid(row=0, column=1, sticky=tk.W, padx=5)
+        label4.grid(row=1, column=1, sticky=tk.W, padx=5)
+        self.entryDeformation.grid(row=0, column=2, sticky=tk.W+tk.E, padx=5)
+        self.entryStress.grid(row=1, column=2, sticky=tk.W+tk.E, padx=5)
+        self.table.grid(row=2, column=0, columnspan=3, sticky=tk.W+tk.E+tk.N+tk.S, padx=5, pady=5)
+        buttonPrev.grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
+        buttonNext.grid(row=3, column=2, sticky=tk.E, padx=5, pady=5)
 
         self.grid_rowconfigure(2, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(2, weight=1)
 
         # Initialize deformation and stress quantities.
         self.deformation_quantities = [Stretch, EngineeringStrain, TrueStrain]
@@ -244,18 +237,23 @@ class PageFive(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-
+        
+        # Initialize widgets.
         labelSamples = tk.Label(self, text='Samples:')
         self.entrySamples = tk.Entry(self)
         self.framePlot = tk.Frame(self)
         buttonPrev = tk.Button(self, text="<<", command=lambda: controller.show_frame("PageFour"))
         buttonNext = tk.Button(self, text="FINISH", command=self.next)
+        
+        # Arrange widgets in a grid.
+        labelSamples.grid(row=0, column=0, sticky=tk.W, padx=5)
+        self.entrySamples.grid(row=0, column=1, sticky=tk.W+tk.E, padx=5, pady=5)
+        self.framePlot.grid(row=1, column=0, columnspan=2, sticky=tk.N+tk.S+tk.W+tk.E, padx=5)
+        buttonPrev.grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
+        buttonNext.grid(row=2, column=1, sticky=tk.E, padx=5, pady=5)
 
-        labelSamples.grid(row=0, column=0)
-        self.entrySamples.grid(row=0, column=1)
-        self.framePlot.grid(row=1, column=0, columnspan=2)
-        buttonPrev.grid(row=2, column=0)
-        buttonNext.grid(row=2, column=1)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(1, weight=1)
 
         # Initialize a Figure for plotting the model.
         fig = Figure(figsize=(5, 2), dpi=100)
