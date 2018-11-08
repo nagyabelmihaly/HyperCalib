@@ -32,7 +32,10 @@ class Yeoh:
 
     def constraint(self, x):
         """Returns the constrain of the Yeoh model."""
-        return 1
+        return x[0]
+
+    def guess(self):
+        return [1.0, 1.0, 1.0]
 
     def func(self, defmode, stretch, c10, c20, c30):
         if defmode == 0:

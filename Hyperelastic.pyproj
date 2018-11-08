@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{fd62caf7-b31c-4e35-abc2-4b8c2c11b37d}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>gui.py</StartupFile>
+    <StartupFile>figure_generator.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -40,6 +40,9 @@
     <Compile Include="deformation.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="figure_generator.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="file_dialog.py">
       <SubType>Code</SubType>
     </Compile>
@@ -58,6 +61,7 @@
     </Compile>
     <Compile Include="rmsae.py" />
     <Compile Include="rmsre.py" />
+    <Compile Include="table_generator.py" />
     <Compile Include="tex_generator.py">
       <SubType>Code</SubType>
     </Compile>

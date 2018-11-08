@@ -36,6 +36,8 @@ from trust_constr import TrustConstr
 from pdf_generator import PdfGenerator
 from tex_generator import TexGenerator
 
+import csv
+
 class GuiSupport:
     """Implements GUI functionality and provides a binding
     between front-end and back-end."""
@@ -109,6 +111,7 @@ class GuiSupport:
         # Load data to speedup developement process.
 
         if False:
+            names = ['EXP1', 'EXP2', 'EXP3']
             measurements = ['Treloar', '2012', '2015']
             separators = [[',', '.'],
                           [';', ','],
@@ -119,13 +122,14 @@ class GuiSupport:
             weightdata = [([1, 0, 0], 'UT'),
                        ([0, 1, 0], 'ET'),
                        ([0, 0, 1], 'PS'),
-                       ([1, 1, 0], 'UTET'),
-                       ([0, 1, 1], 'ETPS'),
-                       ([1, 0, 1], 'PSUT'),
-                       ([1, 1, 1], 'UTETPS')]
-            models = [Ogden(1), Ogden(2), Ogden(3), NeoHooke(), MooneyRivlin(), Yeoh(), ArrudaBoyce()]
+                       ([1, 1, 0], 'UT+ET'),
+                       ([0, 1, 1], 'ET+PS'),
+                       ([1, 0, 1], 'PS+UT'),
+                       ([1, 1, 1], 'UT+ET+PS')]
+            #models = [Ogden(1), Ogden(2), Ogden(3), NeoHooke(), MooneyRivlin(), Yeoh(), ArrudaBoyce()]
+            models = [ArrudaBoyce()]
             error_functions = [RMSAE, RMSRE]
-            for measurement, separator, quantity in zip(measurements, separators, quantities):
+            for name, measurement, separator, quantity in zip(names, measurements, separators, quantities):
                 dp = DataProcessor()
                 self.filenames = ['data/{}/ut.csv'.format(measurement),
                                   'data/{}/et.csv'.format(measurement),
@@ -138,6 +142,9 @@ class GuiSupport:
                     self.plot_defmode[defmode] = True
                 for model in models:
                     self.model = model
+                    r2errors = [COD(model.getfunc(defmode), model.getjac(defmode),
+                                    model.gethess(defmode), self.xdatas[defmode],
+                                    self.ydatas[defmode]) for defmode in range(3)]
                     for error_function in error_functions:
                         self.params = None                        
                         errors = [error_function(model.getfunc(defmode), model.getjac(defmode),
@@ -146,19 +153,17 @@ class GuiSupport:
                         self.update_plot_settings()
                         for weights, weightname in weightdata:
                             self.weighted_error = WeightedError(errors, weights)
+                            r2weighted_error = WeightedError(r2errors, weights)
 
                             method = TrustConstr()
                             method.objfunc = self.weighted_error.objfunc
-                            method.x0 = [1.0] * model.paramcount
+                            method.x0 = model.guess()
                             method.constraint = model.constraint
-                            if isinstance(model, ArrudaBoyce):
-                                method.jac = '2-point'
-                                method.calcJac = False
-                            else:
-                                method.jac = self.weighted_error.jac
-                                method.calcJac = True
+                            method.jac = self.weighted_error.jac
+                            method.calcJac = True
                             method.hess = BFGS()
                             method.calcHess = False
+                            method.maxiter = 10000
 
                             print("""Measurement: {}
 Deformation type: {}
@@ -175,7 +180,8 @@ Error function: {}""".format(measurement,
                             pdfgen.xdatas = self.xdatas
                             pdfgen.ydatas = self.ydatas
                             pdfgen.model = model
-                            pdfgen.params = result.x
+                            params = result.x
+                            pdfgen.params = params
                             pdfgen.plot_defmode = self.plot_defmode
                             pdfgen.plot_error = error_function
                             pdfgen.plot_deformation = quantity[0]
@@ -184,46 +190,41 @@ Error function: {}""".format(measurement,
                             pdfgen.weights = weights
                             pdfgen.method = method
                             pdfgen.fit_error = error_function
-                            pdfgen.filename = os.getcwd() + '/Reports/{}-{}-{}-{}'.format( \
-                                measurement, weightname, model.name, error_function.shortname)
+                            filename = os.getcwd() + '/Reports/{}-{}-{}-{}'.format( \
+                                name, weightname, model.name, error_function.shortname)
+                            pdfgen.filename = filename
                         
                             pdfgen.generate()
 
-        # Load Treloar data
-        #dp = DataProcessor()
-        #measurement = '2012'
-        #self.filenames = ['data/{}/ut.csv'.format(measurement),
-        #                    'data/{}/et.csv'.format(measurement),
-        #                    'data/{}/ps.csv'.format(measurement)]
-        ##model = Ogden(2)
-        #for defmode in range(3):
-        #    dp.load_file(self.filenames[defmode])
-        #    dp.parse_csv(';', ',')
-        #    dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
-        #    self.xdatas[defmode], self.ydatas[defmode] = dp.stretch, dp.true_stress
-        #    self.plot_defmode[defmode] = True
-        #    #self.errors[defmode] = RMSRE(model.getfunc(defmode), model.getjac(defmode),
-        #    #                             model.gethess(defmode), self.xdatas[defmode],
-        #    #                             self.ydatas[defmode])
+                            # Write parameters, R^2 to .csv file
+                            with open(filename + '.csv', 'w', newline='') as csvfile:
+                                spamwriter = csv.writer(csvfile, delimiter=';')
+                                spamwriter.writerow([name, weightname, model.name, error_function.shortname])
+                                spamwriter.writerow([r2errors[defmode].objfunc(params) for defmode in range(3)])
+                                spamwriter.writerows(zip(model.paramnames, params))
 
-        ##weighted_error = WeightedError(self.errors, [1, 0, 0])
-        ##print('weighted error = ' + str(weighted_error.objfunc([1, 1, 1, 1])))
-        #self.w.ButtonFitModel['state'] = tk.NORMAL
+        # Load data
+        dp = DataProcessor()
+        measurement = '2015'
+        self.filenames = ['data/{}/ut.csv'.format(measurement),
+                            'data/{}/et.csv'.format(measurement),
+                            'data/{}/ps.csv'.format(measurement)]
+        model = Ogden(2)
+        for defmode in range(3):
+            dp.load_file(self.filenames[defmode])
+            dp.parse_csv(';', ',')
+            dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
+            self.xdatas[defmode], self.ydatas[defmode] = dp.stretch, dp.true_stress
+            self.plot_defmode[defmode] = True
+            self.errors[defmode] = RMSAE(model.getfunc(defmode), model.getjac(defmode),
+                                         model.gethess(defmode), self.xdatas[defmode],
+                                         self.ydatas[defmode])
 
-        # Generate Tex output
-        #texgen = TexGenerator()
-        #texgen.xdatas = self.xdatas
-        #texgen.ydatas = self.ydatas
-        #texgen.model = Ogden(2)
-        #texgen.params = [8.478e-5, 8.4781e-5, 8.7005, 8.7246]
-        #texgen.plot_defmode = [False, True, True]
-        #texgen.plot_error = RMSRE
-        #texgen.plot_deformation = Stretch
-        #texgen.plot_stress = EngineeringStress
-        #texgen.filenames = self.filenames
-        #texgen.filename = os.getcwd() + '\\example6b'
-                        
-        #texgen.generate()
+        #weighted_error = WeightedError(self.errors, [1, 0, 0])
+        #print('weighted error = ' + str(weighted_error.objfunc([0.3, 5])))
+        print('UT error = ' + str(self.errors[0].objfunc([0.2933, 7.963e-7, 2.087, 9.299])))
+        #print('UT value = ' + str(model.ut(2.0, 0.2933, 7.963e-7, 2.087, 9.299)))
+        self.w.ButtonFitModel['state'] = tk.NORMAL
 
 
         #rmsae = RMSAE(model.ut, model.ut_jac, model.ut_hess, self.xdatas[0], self.ydatas[0])
@@ -355,6 +356,7 @@ Elapsed time: {1:.4f} s
         self.error_values.append(err_val)
         if state is not None and state.niter % 100 == 0:
             self.update_plot_settings()
+            print('Iteration ' + str(state.niter))
 
     def update_plot_settings(self, plot_defmode=None, error=None, deformation_quantity=None, stress_quantity=None):
         if plot_defmode is None: plot_defmode = self.plot_defmode
@@ -416,7 +418,7 @@ Elapsed time: {1:.4f} s
             label = self.titles[defmode]
             if self.errors[defmode] is not None and self.params is not None:
                 label += ' - {} = {:.4g}'.format(self.plot_error.shortname, self.errors[defmode].objfunc(self.params))
-            self.plt.plot(xdata, ydata, marker='o', linestyle='',
+            self.plt.plot(xdata, ydata, marker='.', linestyle='',
                           color=self.data_colors[defmode], label=label)
             is_empty = False
         
@@ -479,8 +481,6 @@ def init(top, gui, *args, **kwargs):
     gui_support.Init(top, gui)
 
 def set_Tk_var():
-    global dummy
-    dummy = tk.StringVar()
     gui_support.SetTkVar()
 
 def ButtonProcess_Click():

@@ -63,6 +63,9 @@ class MooneyRivlin:
         """Returns the constrain of the Mooney-Rivlin model."""
         return x[0] + x[1]
 
+    def guess(self):
+        return [1.0, 1.0]
+
     def ut_jac(self, stretch, c10, c01):
         """Returns the gradient vector of the Mooney-Rivlin model to uniaxial tension."""
         return array([2 * (power(stretch, 2) - 1 / stretch),

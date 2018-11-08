@@ -57,6 +57,9 @@ class Ogden:
         n = self.n
         return [sum([x[i] * x[n + i] for i in range(n)])]
 
+    def guess(self):
+        return [1.0] * (2 * self.n)
+
     def func(self, defmode, stretch, *params):
         if defmode == 0:
             return self.ut(stretch, *params)

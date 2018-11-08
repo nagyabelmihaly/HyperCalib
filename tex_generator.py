@@ -56,7 +56,7 @@ class TexGenerator:
                                     self.xdatas[defmode], self.ydatas[defmode])
 
             label = self.titles[defmode]
-            label += ' - {} = {:.4g}'.format(self.plot_error.shortname, error.objfunc(self.params))
+            label += ' - ${}$ = {:.4g}'.format(self.plot_error.name_latex, error.objfunc(self.params))
             plt.plot(xdata, ydata, marker='o', linestyle='',
                             color=self.data_colors[defmode], label=label)
         

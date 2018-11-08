@@ -107,3 +107,6 @@ venv.bak/
 /.vs/Hyperelastic/v15/.suo
 /report.pdf
 /report.tex
+/Figures
+/Reports
+/Table.txt

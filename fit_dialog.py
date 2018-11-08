@@ -260,8 +260,8 @@ class PageTwo(tk.Frame):
 
         # Set method parameters.
         method.objfunc = weighted_error.objfunc
-        method.x0 = [1.0] * model.paramcount
         method.constraint = model.constraint
+        method.x0 = model.guess()
 
         # Navigate to page appropriate to optimization method.
         if isinstance(method, TrustConstr):
