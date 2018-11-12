@@ -34,7 +34,6 @@ from yeoh import Yeoh
 from arruda_boyce import ArrudaBoyce
 from trust_constr import TrustConstr
 from pdf_generator import PdfGenerator
-from tex_generator import TexGenerator
 
 import csv
 
@@ -106,141 +105,6 @@ class GuiSupport:
         self.plot_error = COD
         self.plot_deformation = Stretch
         self.plot_stress = TrueStress
-
-        # TODO: delete
-        # Load data to speedup developement process.
-
-        if False:
-            names = ['EXP1', 'EXP2', 'EXP3']
-            measurements = ['Treloar', '2012', '2015']
-            separators = [[',', '.'],
-                          [';', ','],
-                          [';', ',']]
-            quantities = [[Stretch, EngineeringStress],
-                          [EngineeringStrain, EngineeringStress],
-                          [EngineeringStrain, EngineeringStress]]
-            weightdata = [([1, 0, 0], 'UT'),
-                       ([0, 1, 0], 'ET'),
-                       ([0, 0, 1], 'PS'),
-                       ([1, 1, 0], 'UT+ET'),
-                       ([0, 1, 1], 'ET+PS'),
-                       ([1, 0, 1], 'PS+UT'),
-                       ([1, 1, 1], 'UT+ET+PS')]
-            #models = [Ogden(1), Ogden(2), Ogden(3), NeoHooke(), MooneyRivlin(), Yeoh(), ArrudaBoyce()]
-            models = [ArrudaBoyce()]
-            error_functions = [RMSAE, RMSRE]
-            for name, measurement, separator, quantity in zip(names, measurements, separators, quantities):
-                dp = DataProcessor()
-                self.filenames = ['data/{}/ut.csv'.format(measurement),
-                                  'data/{}/et.csv'.format(measurement),
-                                  'data/{}/ps.csv'.format(measurement)]
-                for defmode in range(3):
-                    dp.load_file(self.filenames[defmode])
-                    dp.parse_csv(separator[0], separator[1])
-                    dp.define_data(quantity[0], 1, quantity[1], 2)
-                    self.xdatas[defmode], self.ydatas[defmode] = dp.stretch, dp.true_stress
-                    self.plot_defmode[defmode] = True
-                for model in models:
-                    self.model = model
-                    r2errors = [COD(model.getfunc(defmode), model.getjac(defmode),
-                                    model.gethess(defmode), self.xdatas[defmode],
-                                    self.ydatas[defmode]) for defmode in range(3)]
-                    for error_function in error_functions:
-                        self.params = None                        
-                        errors = [error_function(model.getfunc(defmode), model.getjac(defmode),
-                                                 model.gethess(defmode), self.xdatas[defmode],
-                                                 self.ydatas[defmode]) for defmode in range(3)]
-                        self.update_plot_settings()
-                        for weights, weightname in weightdata:
-                            self.weighted_error = WeightedError(errors, weights)
-                            r2weighted_error = WeightedError(r2errors, weights)
-
-                            method = TrustConstr()
-                            method.objfunc = self.weighted_error.objfunc
-                            method.x0 = model.guess()
-                            method.constraint = model.constraint
-                            method.jac = self.weighted_error.jac
-                            method.calcJac = True
-                            method.hess = BFGS()
-                            method.calcHess = False
-                            method.maxiter = 10000
-
-                            print("""Measurement: {}
-Deformation type: {}
-Hyperelastic model: {}
-Error function: {}""".format(measurement,
-                             weightname,
-                             model.name,
-                             error_function.name))
-                            self.error_values = []
-                            result = method.minimize(self.update_model)
-                            print('Model has been fitted.')
-
-                            pdfgen = PdfGenerator()
-                            pdfgen.xdatas = self.xdatas
-                            pdfgen.ydatas = self.ydatas
-                            pdfgen.model = model
-                            params = result.x
-                            pdfgen.params = params
-                            pdfgen.plot_defmode = self.plot_defmode
-                            pdfgen.plot_error = error_function
-                            pdfgen.plot_deformation = quantity[0]
-                            pdfgen.plot_stress = quantity[1]
-                            pdfgen.filenames = self.filenames
-                            pdfgen.weights = weights
-                            pdfgen.method = method
-                            pdfgen.fit_error = error_function
-                            filename = os.getcwd() + '/Reports/{}-{}-{}-{}'.format( \
-                                name, weightname, model.name, error_function.shortname)
-                            pdfgen.filename = filename
-                        
-                            pdfgen.generate()
-
-                            # Write parameters, R^2 to .csv file
-                            with open(filename + '.csv', 'w', newline='') as csvfile:
-                                spamwriter = csv.writer(csvfile, delimiter=';')
-                                spamwriter.writerow([name, weightname, model.name, error_function.shortname])
-                                spamwriter.writerow([r2errors[defmode].objfunc(params) for defmode in range(3)])
-                                spamwriter.writerows(zip(model.paramnames, params))
-
-        # Load data
-        dp = DataProcessor()
-        measurement = '2015'
-        self.filenames = ['data/{}/ut.csv'.format(measurement),
-                            'data/{}/et.csv'.format(measurement),
-                            'data/{}/ps.csv'.format(measurement)]
-        model = Ogden(2)
-        for defmode in range(3):
-            dp.load_file(self.filenames[defmode])
-            dp.parse_csv(';', ',')
-            dp.define_data(EngineeringStrain, 1, EngineeringStress, 2)
-            self.xdatas[defmode], self.ydatas[defmode] = dp.stretch, dp.true_stress
-            self.plot_defmode[defmode] = True
-            self.errors[defmode] = RMSAE(model.getfunc(defmode), model.getjac(defmode),
-                                         model.gethess(defmode), self.xdatas[defmode],
-                                         self.ydatas[defmode])
-
-        #weighted_error = WeightedError(self.errors, [1, 0, 0])
-        #print('weighted error = ' + str(weighted_error.objfunc([0.3, 5])))
-        print('UT error = ' + str(self.errors[0].objfunc([0.2933, 7.963e-7, 2.087, 9.299])))
-        #print('UT value = ' + str(model.ut(2.0, 0.2933, 7.963e-7, 2.087, 9.299)))
-        self.w.ButtonFitModel['state'] = tk.NORMAL
-
-
-        #rmsae = RMSAE(model.ut, model.ut_jac, model.ut_hess, self.xdatas[0], self.ydatas[0])
-        #print('Abaqus RMSAE = ', rmsae.objfunc([6.5991E-3, 0.42654, 5.3619, -4.3558]))
-        #print('HyperCalib RMSAE = ', rmsae.objfunc([0.04209, 0.3044, 4.253, -0.588]))
-        #rmsre = RMSRE(model.ut, model.ut_jac, model.ut_hess, self.xdatas[0], self.ydatas[0])
-        #print('Abaqus RMSRE = ', rmsre.objfunc([6.5991E-3, 0.42654, 5.3619, -4.3558]))
-        #print('HyperCalib RMSRE = ', rmsre.objfunc([0.03719, 0.3292, 4.343, -0.4907]))
-
-        #dp = DataProcessor()
-        #dp.load_file('data/TRELOARUT.csv')
-        #dp.parse_csv(',', '.')
-        #dp.define_data(Stretch(), 1, EngineeringStress(), 2)
-        #self.xdatas[0], self.ydatas[0] = dp.stretch, dp.true_stress
-        #self.plot_defmode[0] = True
-        #self.w.ButtonFitModel['state'] = tk.NORMAL
         
         self.update_plot_settings()
 
@@ -359,43 +223,34 @@ Elapsed time: {1:.4f} s
             print('Iteration ' + str(state.niter))
 
     def update_plot_settings(self, plot_defmode=None, error=None, deformation_quantity=None, stress_quantity=None):
+        # Initialize default values.
         if plot_defmode is None: plot_defmode = self.plot_defmode
         if error is None: error = self.plot_error
         if deformation_quantity is None: deformation_quantity = self.plot_deformation
         if stress_quantity is None: stress_quantity = self.plot_stress
-
-        self.plot_defmode = plot_defmode
-
-        # Refresh plotted values and error instances if a change is present.
-        changed = False
-        for defmode in range(3):
-            changed |= self.xdatas[defmode] is not None and self.plot_xdatas[defmode] is None
-            changed |= self.model is not None and self.errors[defmode] is None
-        changed |= self.plot_deformation != deformation_quantity
-        changed |= self.plot_stress != stress_quantity
-        changed |= self.plot_error != error
         
-        if changed:
-            for defmode in range(3):
-                if self.xdatas[defmode] is None:
-                    continue
-                self.plot_xdatas[defmode] = np.zeros(len(self.xdatas[defmode]))
-                self.plot_ydatas[defmode] = np.zeros(len(self.ydatas[defmode]))
-                for i in range(len(self.xdatas[defmode])):
-                    stretch = self.xdatas[defmode][i]
-                    true_stress = self.ydatas[defmode][i]
-                    self.plot_xdatas[defmode][i] = deformation_quantity.from_stretch(stretch)
-                    self.plot_ydatas[defmode][i] = stress_quantity.from_true_stress(true_stress, stretch)
-                if self.model is None:
-                    self.errors[defmode] = None
-                else:
-                    self.errors[defmode] = error(self.model.getfunc(defmode),
-                                                 self.model.getjac(defmode),
-                                                 self.model.gethess(defmode),
-                                                 self.xdatas[defmode],
-                                                 self.ydatas[defmode])
+        # Update datas, errors.
+        for defmode in range(3):
+            if self.xdatas[defmode] is None:
+                continue
+            self.plot_xdatas[defmode] = np.zeros(len(self.xdatas[defmode]))
+            self.plot_ydatas[defmode] = np.zeros(len(self.ydatas[defmode]))
+            for i in range(len(self.xdatas[defmode])):
+                stretch = self.xdatas[defmode][i]
+                true_stress = self.ydatas[defmode][i]
+                self.plot_xdatas[defmode][i] = deformation_quantity.from_stretch(stretch)
+                self.plot_ydatas[defmode][i] = stress_quantity.from_true_stress(true_stress, stretch)
+            if self.model is None:
+                self.errors[defmode] = None
+            else:
+                self.errors[defmode] = error(self.model.getfunc(defmode),
+                                                self.model.getjac(defmode),
+                                                self.model.gethess(defmode),
+                                                self.xdatas[defmode],
+                                                self.ydatas[defmode])
 
         # Update self variables.
+        self.plot_defmode = plot_defmode
         self.plot_error = error
         self.plot_deformation = deformation_quantity
         self.plot_stress = stress_quantity  
@@ -417,7 +272,7 @@ Elapsed time: {1:.4f} s
 
             label = self.titles[defmode]
             if self.errors[defmode] is not None and self.params is not None:
-                label += ' - {} = {:.4g}'.format(self.plot_error.shortname, self.errors[defmode].objfunc(self.params))
+                label += ' - ${}$ = {:.4g}'.format(self.plot_error.name_latex, self.errors[defmode].objfunc(self.params))
             self.plt.plot(xdata, ydata, marker='.', linestyle='',
                           color=self.data_colors[defmode], label=label)
             is_empty = False

@@ -66,6 +66,8 @@ class PdfGenerator:
                 with doc.create(Itemize()) as errorlist:
                     weighted_error = 0.0
                     for defmode in range(3):
+                        if not self.plot_defmode[defmode]:
+                            continue
                         error = self.fit_error(self.model.getfunc(defmode),
                                                self.model.getjac(defmode),
                                                self.model.gethess(defmode),
@@ -98,8 +100,8 @@ class PdfGenerator:
                                     self.xdatas[defmode], self.ydatas[defmode])
 
             label = self.titles[defmode]
-            label += ' - {} = {:.4g}'.format(self.plot_error.shortname, error.objfunc(self.params))
-            plt.plot(xdata, ydata, marker='o', linestyle='',
+            label += ' - ${}$ = {:.4g}'.format(self.plot_error.name_latex, error.objfunc(self.params))
+            plt.plot(xdata, ydata, marker='.', linestyle='',
                             color=self.data_colors[defmode], label=label)
         
             # Plot fitted models as curves.

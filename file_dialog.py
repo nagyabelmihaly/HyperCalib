@@ -227,7 +227,7 @@ class PageFour(tk.Frame):
         ydata = self.controller.processor.true_stress
         plt = self.controller.frames['PageFive'].plt
         plt.clear()
-        plt.plot(xdata, ydata, 'ko')
+        plt.plot(xdata, ydata, 'k.')
         plt.set_xlabel('stretch')
         plt.set_ylabel('true stress')
         self.controller.frames['PageFive'].canvas.draw()
